@@ -12,6 +12,7 @@ func (h *CatalogHandler) MountRoutes(r chi.Router, m *mw.MiddleWares) {
 		r.Get("/tracks/search", h.SearchTrack)
 		r.Get("/tracks/{track_uuid}", h.GetTrackByID)
 		r.Get("/tracks/{track_uuid}/exists", h.TrackExists)
+		r.Post("/tracks/{track_uuid}/listened", h.IncrementListened)
 
 		r.Get("/artists/search", h.SearchArtist)
 		r.Get("/artists/{artist_uuid}", h.GetArtistByID)

@@ -363,6 +363,7 @@ paths:
         '400': { description: invalid uuid }
         '401': { description: Missing or invalid authorization header }
         '404': { description: Track not found }
+        '429': { description: Прослушивание этого трека уже засчитано недавно (LISTEN_RATE_LIMIT_WINDOW) }
 
   /catalog/artists/{artist_uuid}/tracks:
     get:
@@ -722,6 +723,11 @@ components:
           type: boolean
         path:
           type: string
+          description: |
+            Необязательная подсказка расширения файла (например, `track.flac`).
+            Итоговый путь генерирует сервер: `{album_uuid}/{uuid}{ext}`. Из присланного значения
+            берётся только расширение из списка .mp3, .flac, .ogg, .opus, .m4a, .aac, .wav,
+            остальное игнорируется. Фактический путь возвращается в ответе (`TrackDetails.path`).
         duration_ms:
           type: integer
 

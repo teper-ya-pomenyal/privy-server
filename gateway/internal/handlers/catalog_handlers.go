@@ -1,12 +1,18 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/clients"
+	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/middlewares"
+	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/ratelimit"
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/storage"
 )
 
@@ -16,10 +22,11 @@ const maxTrackFileMemory = 32 << 20
 type CatalogHandler struct {
 	catalogClient *clients.CatalogClient
 	trackStorage  *storage.TrackStorage
+	listenLimiter *ratelimit.ListenLimiter
 }
 
-func NewCatalogHandler(catalogClient *clients.CatalogClient, trackStorage *storage.TrackStorage) *CatalogHandler {
-	return &CatalogHandler{catalogClient: catalogClient, trackStorage: trackStorage}
+func NewCatalogHandler(catalogClient *clients.CatalogClient, trackStorage *storage.TrackStorage, listenLimiter *ratelimit.ListenLimiter) *CatalogHandler {
+	return &CatalogHandler{catalogClient: catalogClient, trackStorage: trackStorage, listenLimiter: listenLimiter}
 }
 
 func parsePageParams(r *http.Request) (int32, int32) {
@@ -203,7 +210,14 @@ func (h *CatalogHandler) AddTrack(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
-	res, err := h.catalogClient.AddTrack(r.Context(), req.TrackName, req.ArtistUUID, req.AlbumUUID, req.Explicit, req.Path, req.DurationMs)
+	albumUUID, err := uuid.Parse(req.AlbumUUID)
+	if err != nil {
+		http.Error(w, "invalid uuid", http.StatusBadRequest)
+		return
+	}
+	// Путь к файлу задаёт сервер: клиентский req.Path используется только как подсказка расширения.
+	trackPath := storage.NewTrackPath(albumUUID, req.Path)
+	res, err := h.catalogClient.AddTrack(r.Context(), req.TrackName, req.ArtistUUID, albumUUID.String(), req.Explicit, trackPath, req.DurationMs)
 	if err != nil {
 		mapGRPCError(w, err)
 		return
@@ -258,8 +272,43 @@ func (h *CatalogHandler) AddTrackFile(w http.ResponseWriter, r *http.Request) {
 
 	size, err := h.trackStorage.AddTrackFile(track.Path, file)
 	if err != nil {
+		if errors.Is(err, storage.ErrInvalidPath) {
+			log.Printf("track %s has unsafe path %q, upload rejected", trackUUID, track.Path)
+			http.Error(w, "invalid track path", http.StatusBadRequest)
+			return
+		}
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"path": track.Path, "size": size})
+}
+
+func (h *CatalogHandler) IncrementListened(w http.ResponseWriter, r *http.Request) {
+	trackUUID := chi.URLParam(r, "track_uuid")
+	userID, ok := middlewares.UserIDFromContext(r.Context())
+	if !ok {
+		http.Error(w, "missing or invalid authorization header", http.StatusUnauthorized)
+		return
+	}
+
+	// Если Redis недоступен, прослушивание всё равно засчитываем (fail-open):
+	// счётчик не критичен, а отказ ломал бы клиенту статистику целиком.
+	allowed, err := h.listenLimiter.Allow(r.Context(), userID, trackUUID)
+	if err != nil {
+		log.Printf("listen rate limiter unavailable: %v", err)
+		allowed = true
+	}
+	if !allowed {
+		http.Error(w, "listen already counted recently", http.StatusTooManyRequests)
+		return
+	}
+
+	if err := h.catalogClient.IncrementListened(r.Context(), trackUUID); err != nil {
+		if relErr := h.listenLimiter.Release(context.WithoutCancel(r.Context()), userID, trackUUID); relErr != nil {
+			log.Printf("listen rate limiter release: %v", relErr)
+		}
+		mapGRPCError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }

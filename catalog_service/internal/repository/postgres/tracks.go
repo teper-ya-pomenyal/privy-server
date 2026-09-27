@@ -38,7 +38,7 @@ func (c *PostgresCatalog) SearchTrack(ctx context.Context, trackName string, lim
 		JOIN artists ar ON ar.artist_id = t.artist_id
 		JOIN albums al ON al.album_id = t.album_id
 		WHERE t.track_name ILIKE '%' || $1 || '%' ESCAPE '\'
-		ORDER BY t.listened DESC NULLS LAST
+		ORDER BY t.listened DESC
 		LIMIT $2 OFFSET $3
 		`,
 		trackName, limit, offset,
@@ -104,7 +104,7 @@ func (c *PostgresCatalog) AddTrack(ctx context.Context, track *domain.Track) err
 func (c *PostgresCatalog) IncrementListened(ctx context.Context, trackUUID uuid.UUID) error {
 	res, err := c.pool.Exec(ctx, `
 		UPDATE tracks
-		SET listened = COALESCE(listened, 0) + 1
+		SET listened = listened + 1
 		WHERE track_id = $1
 		`,
 		trackUUID,

@@ -61,7 +61,4 @@ func (h *HTTPHandlers) StreamTrack(w http.ResponseWriter, r *http.Request) {
 
 	http.ServeContent(w, r, track.FileName, track.ModTime, track.File)
 
-	if err := h.catalog.IncrementListened(r.Context(), trackUUID); err != nil {
-		log.Println("failed to increment listened counter:", err)
-	}
 }

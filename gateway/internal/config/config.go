@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 // desktop client (Tauri) sends requests from its webview origin
@@ -18,6 +19,9 @@ type Config struct {
 	TrackStoragePath           string
 	Port                       string
 	CORSAllowedOrigins         []string
+	RedisAddress               string
+	RedisPassword              string
+	ListenRateLimitWindow      time.Duration
 }
 
 func LoadConfig() *Config {
@@ -39,7 +43,24 @@ func LoadConfig() *Config {
 		TrackStoragePath:           getEnv("TRACK_STORAGE_PATH", "data/tracks"),
 		Port:                       getEnv("PORT", "8080"),
 		CORSAllowedOrigins:         corsOrigins,
+		RedisAddress:               getEnv("GATEWAY_REDIS_ADDRESS", "localhost:6379"),
+		RedisPassword:              os.Getenv("GATEWAY_REDIS_PASSWORD"),
+		ListenRateLimitWindow:      getDurationEnv("LISTEN_RATE_LIMIT_WINDOW", 30*time.Second),
 	}
+}
+
+// getDurationEnv expects Go duration format, e.g. "30s", "5m".
+func getDurationEnv(key string, def time.Duration) time.Duration {
+	v := os.Getenv(key)
+	if v == "" {
+		log.Printf("environment variable %s is not set, using default", key)
+		return def
+	}
+	d, err := time.ParseDuration(v)
+	if err != nil {
+		log.Fatalf("invalid duration value for %s: %q: %v", key, v, err)
+	}
+	return d
 }
 
 func getEnv(key, def string) string {

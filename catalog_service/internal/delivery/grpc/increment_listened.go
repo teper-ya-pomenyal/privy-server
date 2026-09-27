@@ -11,9 +11,6 @@ import (
 )
 
 func (h *CatalogWriteGRPCHandler) IncrementListened(ctx context.Context, req *catalogv1.IncrementListenedRequest) (*catalogv1.IncrementListenedResponse, error) {
-	if req.TrackUuid == "" {
-		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidCharacters.Error())
-	}
 	trackUUID, err := uuid.Parse(req.TrackUuid)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidUUID.Error())

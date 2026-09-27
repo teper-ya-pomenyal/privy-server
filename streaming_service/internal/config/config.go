@@ -6,18 +6,16 @@ import (
 )
 
 type Config struct {
-	TrackStoragePath           string
-	CatalogServiceAddress      string
-	CatalogWriteServiceAddress string
-	Port                       string
+	TrackStoragePath      string
+	CatalogServiceAddress string
+	Port                  string
 }
 
 func NewConfig() *Config {
 	return &Config{
-		TrackStoragePath:           getEnv("TRACK_STORAGE_PATH", "data/tracks"),
-		CatalogServiceAddress:      getEnv("CATALOG_SERVICE_ADDRESS", "localhost:50053"),
-		CatalogWriteServiceAddress: getEnv("CATALOG_WRITE_SERVICE_ADDRESS", "localhost:50056"),
-		Port:                       getEnv("STREAMING_SERVICE_PORT", "50054"),
+		TrackStoragePath:      getEnv("TRACK_STORAGE_PATH", "data/tracks"),
+		CatalogServiceAddress: getEnv("CATALOG_SERVICE_ADDRESS", "localhost:50053"),
+		Port:                  getEnv("STREAMING_SERVICE_PORT", "50054"),
 	}
 }
 

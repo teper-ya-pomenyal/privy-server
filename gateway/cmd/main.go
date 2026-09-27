@@ -9,10 +9,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/clients"
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/config"
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/handlers"
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/middlewares"
+	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/ratelimit"
 	"github.com/teper-ya-pomenyal/privy_stream/gateway/internal/storage"
 	"github.com/teper-ya-pomenyal/privy_stream/jwtmanager"
 )
@@ -38,8 +40,20 @@ func main() {
 
 	trackStorage := storage.NewTrackStorage(cfg.TrackStoragePath)
 
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.RedisAddress,
+		Password: cfg.RedisPassword,
+	})
+	defer rdb.Close()
+	pingCtx, pingCancel := context.WithTimeout(context.Background(), 3*time.Second)
+	if err := rdb.Ping(pingCtx).Err(); err != nil {
+		log.Printf("redis %s unavailable, listen rate limit is disabled until it recovers: %v", cfg.RedisAddress, err)
+	}
+	pingCancel()
+	listenLimiter := ratelimit.NewListenLimiter(rdb, cfg.ListenRateLimitWindow)
+
 	userHandler := handlers.NewUserHandler(userClient)
-	catalogHandler := handlers.NewCatalogHandler(catalogClient, trackStorage)
+	catalogHandler := handlers.NewCatalogHandler(catalogClient, trackStorage, listenLimiter)
 	streamingRouter := handlers.NewStreamingRouter(cfg.StreamingServiceAddress, mw)
 
 	router := userHandler.NewRouter(mw, cfg.CORSAllowedOrigins)

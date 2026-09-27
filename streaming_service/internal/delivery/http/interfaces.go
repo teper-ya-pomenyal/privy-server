@@ -15,5 +15,4 @@ type Streamer interface {
 
 type Catalog interface {
 	GetTrackByID(ctx context.Context, trackUUID uuid.UUID) (*grpc.TrackLocation, error)
-	IncrementListened(ctx context.Context, trackUUID uuid.UUID) error
 }

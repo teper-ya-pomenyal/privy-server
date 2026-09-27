@@ -6,14 +6,12 @@ import (
 )
 
 type CatalogClient struct {
-	client      catalogv1.CatalogServiceClient
-	writeClient catalogv1.CatalogWriteServiceClient
+	client catalogv1.CatalogServiceClient
 }
 
-func NewCatalogClient(conn, writeConn *grpc.ClientConn) *CatalogClient {
+func NewCatalogClient(conn *grpc.ClientConn) *CatalogClient {
 	return &CatalogClient{
-		client:      catalogv1.NewCatalogServiceClient(conn),
-		writeClient: catalogv1.NewCatalogWriteServiceClient(writeConn),
+		client: catalogv1.NewCatalogServiceClient(conn),
 	}
 }
 
