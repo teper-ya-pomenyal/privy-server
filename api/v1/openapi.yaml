@@ -677,6 +677,292 @@ paths:
         '409':
           description: Album already exists
 
+  /admin/health:
+    get:
+      summary: Состояние зависимостей узла
+      description: >
+        Ping postgres и redis (сессии) в user_service, postgres в catalog_service,
+        доступность streaming_service (пробный запрос /stream) и хранилища треков.
+        Только для владельца узла.
+      operationId: adminHealth
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Состояние сервисов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminHealth'
+        '401':
+          description: Missing or invalid authorization header
+        '403':
+          description: owner role required
+
+  /admin/logs:
+    get:
+      summary: Последние записи журнала узла
+      description: >
+        Кольцевые буферы gateway, user_service и catalog_service, объединённые
+        по времени (новые первыми). streaming_service журнала не ведёт — его
+        отказы видны в записях gateway как 5xx на /stream. Только для владельца.
+      operationId: adminLogs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 200
+            maximum: 500
+        - name: service
+          in: query
+          schema:
+            type: string
+            enum: [gateway, user_service, catalog_service]
+        - name: level
+          in: query
+          schema:
+            type: string
+            enum: [INFO, WARN, ERROR]
+      responses:
+        '200':
+          description: Записи журнала
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  entries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminLogEntry'
+        '401':
+          description: Missing or invalid authorization header
+        '403':
+          description: owner role required
+
+  /admin/sessions:
+    get:
+      summary: Активные refresh-сессии пользователя
+      description: >
+        session_id — это SHA-256 refresh-токена: сам токен user_service не покидает.
+        Только для владельца.
+      operationId: adminListSessions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: user
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Список сессий
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminSession'
+        '400':
+          description: Invalid user query parameter
+        '401':
+          description: Missing or invalid authorization header
+        '403':
+          description: owner role required
+
+  /admin/sessions/{session_id}:
+    delete:
+      summary: Отозвать одну сессию пользователя
+      operationId: adminDeleteSession
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: user
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Сессия отозвана
+        '400':
+          description: Invalid parameters
+        '401':
+          description: Missing or invalid authorization header
+        '403':
+          description: owner role required
+
+  /admin/sessions/revoke-others:
+    post:
+      summary: Отозвать все сессии пользователя, кроме указанной
+      operationId: adminRevokeOtherSessions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user, keep_session_id]
+              properties:
+                user:
+                  type: string
+                  format: uuid
+                keep_session_id:
+                  type: string
+      responses:
+        '204':
+          description: Сессии отозваны
+        '400':
+          description: Invalid request body
+        '401':
+          description: Missing or invalid authorization header
+        '403':
+          description: owner role required
+
+  /admin/users:
+    get:
+      summary: Аккаунты узла
+      description: Список с пагинацией и общим счётчиком. Только для владельца.
+      operationId: adminListUsers
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Аккаунты и общее число
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminUser'
+                  total:
+                    type: integer
+        '401':
+          description: Missing or invalid authorization header
+        '403':
+          description: owner role required
+
+  /admin/users/{user_uuid}:
+    patch:
+      summary: Блокировка аккаунта
+      description: >
+        Блокировка сразу отзывает все refresh-сессии пользователя и не пускает
+        его в /login и /refresh (403 user is blocked). Разблокировка возвращает
+        доступ к входу. Только для владельца.
+      operationId: adminPatchUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [blocked]
+              properties:
+                blocked:
+                  type: boolean
+      responses:
+        '204':
+          description: Флаг блокировки обновлён
+        '400':
+          description: Invalid request body
+        '401':
+          description: Missing or invalid authorization header
+        '403':
+          description: owner role required
+        '404':
+          description: User not found
+
+  /admin/moderation:
+    get:
+      summary: Треки каталога для модерации меток 18+
+      description: Полный список треков с фильтром по explicit и общим счётчиком. Только для владельца.
+      operationId: adminModerationList
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: explicit
+          in: query
+          schema:
+            type: string
+            enum: [all, explicit, clean]
+            default: all
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Треки и общее число по фильтру
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Track'
+                  total:
+                    type: integer
+        '401':
+          description: Missing or invalid authorization header
+        '403':
+          description: owner role required
+
+  /admin/moderation/{track_uuid}:
+    patch:
+      summary: Сменить метку 18+ у существующего трека
+      operationId: adminSetExplicit
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TrackUuid'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [explicit]
+              properties:
+                explicit:
+                  type: boolean
+      responses:
+        '204':
+          description: Метка обновлена
+        '400':
+          description: Invalid request body
+        '401':
+          description: Missing or invalid authorization header
+        '403':
+          description: owner role required
+        '404':
+          description: Track not found
+
 components:
   securitySchemes:
     bearerAuth:
@@ -720,8 +1006,100 @@ components:
       schema:
         type: string
         format: uuid
+    UserUuid:
+      name: user_uuid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
 
   schemas:
+    AdminHealth:
+      type: object
+      properties:
+        checked_at:
+          type: string
+          format: date-time
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminServiceHealth'
+
+    AdminServiceHealth:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [UP, DOWN]
+        ms:
+          type: integer
+        note:
+          type: string
+        postgres:
+          type: boolean
+        redis:
+          type: boolean
+
+    AdminLogEntry:
+      type: object
+      properties:
+        at:
+          type: integer
+          description: Unix-время в миллисекундах
+        level:
+          type: string
+          enum: [INFO, WARN, ERROR]
+        service:
+          type: string
+          enum: [gateway, user_service, catalog_service]
+        method:
+          type: string
+        path:
+          type: string
+          description: HTTP-путь или gRPC full method
+        code:
+          type: string
+        ms:
+          type: integer
+        message:
+          type: string
+
+    AdminSession:
+      type: object
+      properties:
+        session_id:
+          type: string
+          description: SHA-256 refresh-токена (hex)
+        created_at:
+          type: integer
+          description: Unix-секунды, время последней ротации токена
+        expires_at:
+          type: integer
+          description: Unix-секунды, TTL refresh-токена
+
+    AdminUser:
+      type: object
+      properties:
+        user_uuid:
+          type: string
+          format: uuid
+        user_name:
+          type: string
+        role:
+          type: string
+          enum: [owner, user]
+        blocked:
+          type: boolean
+        birth_date:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
     ValidationError:
       type: object
       required:
