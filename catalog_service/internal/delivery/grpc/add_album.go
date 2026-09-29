@@ -18,7 +18,12 @@ func (h *CatalogWriteGRPCHandler) AddAlbum(ctx context.Context, req *catalogv1.A
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidUUID.Error())
 	}
-	album, err := h.albumUseCase.AddAlbum(ctx, artistUUID, req.AlbumName)
+	albumReq := &domain.Album{
+		ArtistUUID: artistUUID,
+		AlbumName:  req.AlbumName,
+		CoverPath:  req.CoverPath,
+	}
+	album, err := h.albumUseCase.AddAlbum(ctx, albumReq)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -28,6 +33,7 @@ func (h *CatalogWriteGRPCHandler) AddAlbum(ctx context.Context, req *catalogv1.A
 			ArtistUuid: album.ArtistUUID.String(),
 			AlbumName:  album.AlbumName,
 			CreatedAt:  album.CreatedAt.Format(timeLayout),
+			CoverPath:  album.CoverPath,
 		},
 	}, nil
 }

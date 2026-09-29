@@ -430,6 +430,8 @@ const (
 	CatalogWriteService_AddTrack_FullMethodName          = "/catalog.v1.CatalogWriteService/AddTrack"
 	CatalogWriteService_AddTracksToAlbum_FullMethodName  = "/catalog.v1.CatalogWriteService/AddTracksToAlbum"
 	CatalogWriteService_IncrementListened_FullMethodName = "/catalog.v1.CatalogWriteService/IncrementListened"
+	CatalogWriteService_SetAlbumCover_FullMethodName     = "/catalog.v1.CatalogWriteService/SetAlbumCover"
+	CatalogWriteService_SetTrackCover_FullMethodName     = "/catalog.v1.CatalogWriteService/SetTrackCover"
 )
 
 // CatalogWriteServiceClient is the client API for CatalogWriteService service.
@@ -444,6 +446,8 @@ type CatalogWriteServiceClient interface {
 	AddTrack(ctx context.Context, in *AddTrackRequest, opts ...grpc.CallOption) (*AddTrackResponse, error)
 	AddTracksToAlbum(ctx context.Context, in *AddTracksToAlbumRequest, opts ...grpc.CallOption) (*AddTracksToAlbumResponse, error)
 	IncrementListened(ctx context.Context, in *IncrementListenedRequest, opts ...grpc.CallOption) (*IncrementListenedResponse, error)
+	SetAlbumCover(ctx context.Context, in *SetAlbumCoverRequest, opts ...grpc.CallOption) (*SetAlbumCoverResponse, error)
+	SetTrackCover(ctx context.Context, in *SetTrackCoverRequest, opts ...grpc.CallOption) (*SetTrackCoverResponse, error)
 }
 
 type catalogWriteServiceClient struct {
@@ -504,6 +508,26 @@ func (c *catalogWriteServiceClient) IncrementListened(ctx context.Context, in *I
 	return out, nil
 }
 
+func (c *catalogWriteServiceClient) SetAlbumCover(ctx context.Context, in *SetAlbumCoverRequest, opts ...grpc.CallOption) (*SetAlbumCoverResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetAlbumCoverResponse)
+	err := c.cc.Invoke(ctx, CatalogWriteService_SetAlbumCover_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *catalogWriteServiceClient) SetTrackCover(ctx context.Context, in *SetTrackCoverRequest, opts ...grpc.CallOption) (*SetTrackCoverResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetTrackCoverResponse)
+	err := c.cc.Invoke(ctx, CatalogWriteService_SetTrackCover_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CatalogWriteServiceServer is the server API for CatalogWriteService service.
 // All implementations must embed UnimplementedCatalogWriteServiceServer
 // for forward compatibility.
@@ -516,6 +540,8 @@ type CatalogWriteServiceServer interface {
 	AddTrack(context.Context, *AddTrackRequest) (*AddTrackResponse, error)
 	AddTracksToAlbum(context.Context, *AddTracksToAlbumRequest) (*AddTracksToAlbumResponse, error)
 	IncrementListened(context.Context, *IncrementListenedRequest) (*IncrementListenedResponse, error)
+	SetAlbumCover(context.Context, *SetAlbumCoverRequest) (*SetAlbumCoverResponse, error)
+	SetTrackCover(context.Context, *SetTrackCoverRequest) (*SetTrackCoverResponse, error)
 	mustEmbedUnimplementedCatalogWriteServiceServer()
 }
 
@@ -540,6 +566,12 @@ func (UnimplementedCatalogWriteServiceServer) AddTracksToAlbum(context.Context, 
 }
 func (UnimplementedCatalogWriteServiceServer) IncrementListened(context.Context, *IncrementListenedRequest) (*IncrementListenedResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method IncrementListened not implemented")
+}
+func (UnimplementedCatalogWriteServiceServer) SetAlbumCover(context.Context, *SetAlbumCoverRequest) (*SetAlbumCoverResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetAlbumCover not implemented")
+}
+func (UnimplementedCatalogWriteServiceServer) SetTrackCover(context.Context, *SetTrackCoverRequest) (*SetTrackCoverResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetTrackCover not implemented")
 }
 func (UnimplementedCatalogWriteServiceServer) mustEmbedUnimplementedCatalogWriteServiceServer() {}
 func (UnimplementedCatalogWriteServiceServer) testEmbeddedByValue()                             {}
@@ -652,6 +684,42 @@ func _CatalogWriteService_IncrementListened_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogWriteService_SetAlbumCover_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetAlbumCoverRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogWriteServiceServer).SetAlbumCover(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogWriteService_SetAlbumCover_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogWriteServiceServer).SetAlbumCover(ctx, req.(*SetAlbumCoverRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CatalogWriteService_SetTrackCover_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetTrackCoverRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogWriteServiceServer).SetTrackCover(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogWriteService_SetTrackCover_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogWriteServiceServer).SetTrackCover(ctx, req.(*SetTrackCoverRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CatalogWriteService_ServiceDesc is the grpc.ServiceDesc for CatalogWriteService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -678,6 +746,14 @@ var CatalogWriteService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IncrementListened",
 			Handler:    _CatalogWriteService_IncrementListened_Handler,
+		},
+		{
+			MethodName: "SetAlbumCover",
+			Handler:    _CatalogWriteService_SetAlbumCover_Handler,
+		},
+		{
+			MethodName: "SetTrackCover",
+			Handler:    _CatalogWriteService_SetTrackCover_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

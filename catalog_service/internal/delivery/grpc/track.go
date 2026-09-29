@@ -26,6 +26,7 @@ func (h *CatalogGRPCHandler) GetTrackByID(ctx context.Context, req *catalogv1.Ge
 		Path:       trackPath.Path,
 		DurationMs: int32(trackPath.DurationMS),
 		Explicit:   trackPath.Explicit,
+		AlbumUuid:  trackPath.AlbumID.String(),
 	}, nil
 }
 

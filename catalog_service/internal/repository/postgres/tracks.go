@@ -14,12 +14,12 @@ func (c *PostgresCatalog) GetTrackByID(ctx context.Context, trackUUID uuid.UUID)
 	trackPath := &domain.TrackPath{}
 
 	err := c.pool.QueryRow(ctx, `
-		SELECT path, duration_ms, explicit
+		SELECT path, duration_ms, explicit, album_id
 		FROM tracks
 		WHERE track_id = $1
 		`,
 		trackUUID,
-	).Scan(&trackPath.Path, &trackPath.DurationMS, &trackPath.Explicit)
+	).Scan(&trackPath.Path, &trackPath.DurationMS, &trackPath.Explicit, &trackPath.AlbumID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, domain.ErrTrackNotFound
@@ -33,7 +33,8 @@ func (c *PostgresCatalog) SearchTrack(ctx context.Context, trackName string, lim
 	rows, err := c.pool.Query(ctx, `
 		SELECT
 			t.track_id, t.track_name, t.artist_id, ar.artist_name,
-		 	t.album_id, al.album_name, t.explicit, t.created_at, t.duration_ms
+			COALESCE(t.cover_path, ''), t.album_id,
+			al.album_name, t.explicit, t.created_at, t.duration_ms
 		FROM tracks t
 		JOIN artists ar ON ar.artist_id = t.artist_id
 		JOIN albums al ON al.album_id = t.album_id
@@ -52,7 +53,7 @@ func (c *PostgresCatalog) SearchTrack(ctx context.Context, trackName string, lim
 	for rows.Next() {
 		var t domain.Track
 		if err := rows.Scan(
-			&t.TrackID, &t.TrackName, &t.ArtistID, &t.ArtistName,
+			&t.TrackID, &t.TrackName, &t.ArtistID, &t.ArtistName, &t.CoverPath,
 			&t.AlbumID, &t.AlbumName, &t.Explicit, &t.CreatedAt, &t.DurationMS,
 		); err != nil {
 			return nil, err
@@ -85,10 +86,12 @@ func (c *PostgresCatalog) TrackExists(ctx context.Context, trackUUID uuid.UUID) 
 func (c *PostgresCatalog) AddTrack(ctx context.Context, track *domain.Track) error {
 	_, err := c.pool.Exec(ctx,
 		`INSERT INTO tracks
-			(track_id, track_name, artist_id, album_id,
-			explicit, created_at, path, duration_ms)
-		 VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
-		track.TrackID, track.TrackName, track.ArtistID, track.AlbumID, track.Explicit, track.CreatedAt, track.Path, track.DurationMS,
+		(track_id, track_name, artist_id, album_id,
+		explicit, created_at, path, duration_ms, cover_path)
+	 VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+		track.TrackID, track.TrackName, track.ArtistID,
+		track.AlbumID, track.Explicit, track.CreatedAt,
+		track.TrackPath, track.DurationMS, track.CoverPath,
 	)
 	if err != nil {
 		var pgErr *pgconn.PgError

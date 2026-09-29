@@ -11,4 +11,5 @@ type Album struct {
 	ArtistUUID uuid.UUID `db:"artist_id"`
 	AlbumName  string    `db:"album_name"`
 	CreatedAt  time.Time `db:"created_at"`
+	CoverPath  string    `db:"cover_path"`
 }

@@ -270,7 +270,7 @@ func (h *CatalogHandler) AddTrackFile(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	size, err := h.trackStorage.AddTrackFile(track.Path, file)
+	size, err := h.trackStorage.AddFile(track.Path, file)
 	if err != nil {
 		if errors.Is(err, storage.ErrInvalidPath) {
 			log.Printf("track %s has unsafe path %q, upload rejected", trackUUID, track.Path)
@@ -281,6 +281,81 @@ func (h *CatalogHandler) AddTrackFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"path": track.Path, "size": size})
+}
+
+// uploadCover принимает multipart-файл, генерирует серверный путь обложки
+// по тому же принципу, что и путь трека, и записывает файл в хранилище.
+// Файл пишется до обновления каталога: осиротевший файл безопаснее,
+// чем ссылка на несуществующий файл в БД.
+func (h *CatalogHandler) uploadCover(w http.ResponseWriter, r *http.Request, albumUUID uuid.UUID) (string, int64, bool) {
+	if err := r.ParseMultipartForm(maxTrackFileMemory); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return "", 0, false
+	}
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return "", 0, false
+	}
+	defer file.Close()
+
+	coverPath := storage.NewCoverPath(albumUUID, header.Filename)
+	size, err := h.trackStorage.AddFile(coverPath, file)
+	if err != nil {
+		if errors.Is(err, storage.ErrInvalidPath) {
+			http.Error(w, "invalid cover path", http.StatusBadRequest)
+			return "", 0, false
+		}
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return "", 0, false
+	}
+	return coverPath, size, true
+}
+
+func (h *CatalogHandler) AddTrackCover(w http.ResponseWriter, r *http.Request) {
+	trackUUID := chi.URLParam(r, "track_uuid")
+	track, err := h.catalogClient.GetTrackByID(r.Context(), trackUUID)
+	if err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+	albumUUID, err := uuid.Parse(track.AlbumUUID)
+	if err != nil {
+		http.Error(w, "track has no valid album", http.StatusBadRequest)
+		return
+	}
+
+	coverPath, size, ok := h.uploadCover(w, r, albumUUID)
+	if !ok {
+		return
+	}
+	if err := h.catalogClient.SetTrackCover(r.Context(), trackUUID, coverPath); err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"path": coverPath, "size": size})
+}
+
+func (h *CatalogHandler) AddAlbumCover(w http.ResponseWriter, r *http.Request) {
+	albumUUID, err := uuid.Parse(chi.URLParam(r, "album_uuid"))
+	if err != nil {
+		http.Error(w, "invalid uuid", http.StatusBadRequest)
+		return
+	}
+	if _, err := h.catalogClient.GetAlbumByID(r.Context(), albumUUID.String()); err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+
+	coverPath, size, ok := h.uploadCover(w, r, albumUUID)
+	if !ok {
+		return
+	}
+	if err := h.catalogClient.SetAlbumCover(r.Context(), albumUUID.String(), coverPath); err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"path": coverPath, "size": size})
 }
 
 func (h *CatalogHandler) IncrementListened(w http.ResponseWriter, r *http.Request) {

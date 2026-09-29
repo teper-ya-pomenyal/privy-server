@@ -35,18 +35,15 @@ func (a *AlbumUseCase) GetAlbumTracks(ctx context.Context, albumUUID uuid.UUID) 
 
 ///////////////////////////////////////
 
-func (a *AlbumUseCase) AddAlbum(ctx context.Context, artistUUID uuid.UUID, albumName string) (*domain.Album, error) {
-	cleanAlN, err := utils.ValidateAlbumName(albumName)
+func (a *AlbumUseCase) AddAlbum(ctx context.Context, album *domain.Album) (*domain.Album, error) {
+	cleanAlN, err := utils.ValidateAlbumName(album.AlbumName)
 	if err != nil {
 		return nil, err
 	}
 
-	album := &domain.Album{
-		AlbumUUID:  uuid.New(),
-		ArtistUUID: artistUUID,
-		AlbumName:  cleanAlN,
-		CreatedAt:  time.Now(),
-	}
+	album.AlbumName = cleanAlN
+	album.AlbumUUID = uuid.New()
+	album.CreatedAt = time.Now()
 	if err := a.repo.AddAlbum(ctx, album); err != nil {
 		return nil, err
 	}
@@ -55,4 +52,8 @@ func (a *AlbumUseCase) AddAlbum(ctx context.Context, artistUUID uuid.UUID, album
 
 func (a *AlbumUseCase) AddTracksToAlbum(ctx context.Context, tracks []domain.AlbumTrack) error {
 	return a.repo.AddTracksToAlbum(ctx, tracks)
+}
+
+func (a *AlbumUseCase) SetAlbumCover(ctx context.Context, albumUUID uuid.UUID, coverPath string) error {
+	return a.repo.SetAlbumCover(ctx, albumUUID, coverPath)
 }

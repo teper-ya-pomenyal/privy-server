@@ -26,6 +26,8 @@ service CatalogWriteService {
     rpc AddTrack(AddTrackRequest) returns (AddTrackResponse);
     rpc AddTracksToAlbum(AddTracksToAlbumRequest) returns (AddTracksToAlbumResponse);
     rpc IncrementListened(IncrementListenedRequest) returns (IncrementListenedResponse);
+    rpc SetAlbumCover(SetAlbumCoverRequest) returns (SetAlbumCoverResponse);
+    rpc SetTrackCover(SetTrackCoverRequest) returns (SetTrackCoverResponse);
 }
 
 // структуры для клиента
@@ -59,6 +61,7 @@ message Album {
     string artist_uuid = 2;
     string album_name = 3;
     string created_at = 4;
+    string cover_path = 5;
 }
 
 message LightAlbum {
@@ -118,6 +121,7 @@ message GetTrackByIDResponse {
     string path = 1;
     int32 duration_ms = 2;
     bool explicit = 3;
+    string album_uuid = 4;
 }
 
 
@@ -218,6 +222,7 @@ message AddArtistResponse {
 message AddAlbumRequest {
     string artist_uuid = 1;
     string album_name = 2;
+    string cover_path = 3;
 }
 
 message AddAlbumResponse {
@@ -230,8 +235,9 @@ message AddTrackRequest {
     string artist_uuid = 2;
     string album_uuid = 3;
     bool explicit = 4;
-    string path = 5;
-    int32 duration_ms = 6;
+    string track_path = 5;
+    string cover_path = 6;
+    int32 duration_ms = 7;
 }
 
 message AddTrackResponse {
@@ -240,8 +246,9 @@ message AddTrackResponse {
     string artist_uuid = 3;
     string album_uuid = 4;
     bool explicit = 5;
-    string path = 6;
-    int32 duration_ms = 7;
+    string track_path = 6;
+    string cover_path = 7;
+    int32 duration_ms = 8;
 }
 
 //
@@ -256,6 +263,23 @@ message AddTracksToAlbumRequest {
 }
 
 message AddTracksToAlbumResponse {}
+
+// Обложка — собственность альбома: путь пишется альбому и всем его трекам,
+// чтобы обложка трека всегда совпадала с обложкой альбома (сингл = альбом
+// с одноимённым треком, файл один).
+message SetAlbumCoverRequest {
+    string album_uuid = 1;
+    string cover_path = 2;
+}
+
+message SetAlbumCoverResponse {}
+
+message SetTrackCoverRequest {
+    string track_uuid = 1;
+    string cover_path = 2;
+}
+
+message SetTrackCoverResponse {}
 
 message IncrementListenedRequest {
     string track_uuid = 1;

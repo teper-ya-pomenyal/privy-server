@@ -23,6 +23,14 @@ var allowedAudioExt = map[string]bool{
 	".wav":  true,
 }
 
+var allowedImageExt = map[string]bool{
+	".jpg":  true,
+	".jpeg": true,
+	".png":  true,
+	".webp": true,
+	".gif":  true,
+}
+
 type TrackStorage struct {
 	basePath string
 }
@@ -43,7 +51,21 @@ func NewTrackPath(albumUUID uuid.UUID, clientPath string) string {
 	return albumUUID.String() + "/" + uuid.NewString() + ext
 }
 
-func (s *TrackStorage) AddTrackFile(path string, r io.Reader) (int64, error) {
+// NewCoverPath генерирует путь файла обложки по тому же принципу, что и трек:
+// {album_uuid}/{random_uuid}{ext}. Из присланного клиентом имени берётся только
+// расширение, и только из белого списка. Файл один, ссылку на него получают
+// и альбом, и его треки.
+func NewCoverPath(albumUUID uuid.UUID, clientPath string) string {
+	ext := strings.ToLower(filepath.Ext(clientPath))
+	if !allowedImageExt[ext] {
+		ext = ""
+	}
+	return albumUUID.String() + "/" + uuid.NewString() + ext
+}
+
+// AddFile записывает файл по пути, сгенерированному на сервере
+// (NewTrackPath / NewCoverPath).
+func (s *TrackStorage) AddFile(path string, r io.Reader) (int64, error) {
 	// Защита для треков, созданных до серверной генерации путей: в базе может лежать
 	// путь вида "../../что-угодно".
 	if !filepath.IsLocal(path) {

@@ -28,6 +28,7 @@ func (h *CatalogGRPCHandler) GetAlbumByID(ctx context.Context, req *catalogv1.Ge
 			ArtistUuid: album.ArtistUUID.String(),
 			AlbumName:  album.AlbumName,
 			CreatedAt:  album.CreatedAt.Format(timeLayout),
+			CoverPath:  album.CoverPath,
 		},
 	}, nil
 }

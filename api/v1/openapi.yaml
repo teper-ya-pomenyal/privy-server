@@ -243,6 +243,53 @@ paths:
         '500':
           description: Internal server error
 
+  /catalog/tracks/{track_uuid}/cover:
+    post:
+      summary: Загрузить обложку трека (становится обложкой его альбома)
+      description: >
+        Файл один, ссылку на него получают и трек, и его альбом со всеми треками:
+        обложка трека всегда совпадает с обложкой альбома. Имя файла на сервере
+        генерируется заново, у клиента берётся только расширение (jpg, jpeg, png, webp, gif).
+        Итоговый путь возвращается в ответе и читается через
+        GET /catalog/albums/{album_uuid} (поле cover_path).
+      operationId: addTrackCover
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TrackUuid'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Обложка загружена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  path:
+                    type: string
+                  size:
+                    type: integer
+        '400':
+          description: Invalid request body
+        '401':
+          description: Missing or invalid authorization header
+        '404':
+          description: Track not found
+        '500':
+          description: Internal server error
+
   /stream/{track_uuid}:
     get:
       summary: Стримить аудиофайл трека (поддерживает Range-запросы)
@@ -478,6 +525,53 @@ paths:
         '409':
           description: Track already in album, or position already taken
 
+  /catalog/albums/{album_uuid}/cover:
+    post:
+      summary: Загрузить обложку альбома
+      description: >
+        Путь обложки записывается альбому и всем его трекам (обложка альбома
+        приоритетна). Имя файла на сервере генерируется заново, у клиента
+        берётся только расширение (jpg, jpeg, png, webp, gif).
+        Итоговый путь возвращается в ответе и читается через
+        GET /catalog/albums/{album_uuid} (поле cover_path).
+      operationId: addAlbumCover
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AlbumUuid'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Обложка загружена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  path:
+                    type: string
+                  size:
+                    type: integer
+        '400':
+          description: Invalid request body
+        '401':
+          description: Missing or invalid authorization header
+        '404':
+          description: Album not found
+        '500':
+          description: Internal server error
+
   /catalog/albums:
     post:
       summary: Добавить альбом
@@ -679,6 +773,9 @@ components:
           type: string
         duration_ms:
           type: integer
+        album_uuid:
+          type: string
+          format: uuid
 
     TrackDetails:
       type: object
@@ -779,6 +876,13 @@ components:
         created_at:
           type: string
           format: date-time
+        cover_path:
+          type: string
+          description: |
+            Путь файла обложки в хранилище, пустая строка — обложки нет.
+            Заполняется через POST /catalog/albums/{album_uuid}/cover или
+            POST /catalog/tracks/{track_uuid}/cover: файл один, и у альбома,
+            и у всех его треков путь совпадает.
 
     AddAlbumRequest:
       type: object

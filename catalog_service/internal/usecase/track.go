@@ -47,22 +47,27 @@ func (t *TrackUseCase) SearchTracks(ctx context.Context, trackName string, limit
 
 ////////////////////////////////////////////////////
 
-func (t *TrackUseCase) AddTrack(ctx context.Context, trackName string, artistUUID, albumUUID uuid.UUID, explicit bool, path string, durationMS time.Duration) (*domain.Track, error) {
-	cleanTN, err := utils.ValidateTrackName(trackName)
+func (t *TrackUseCase) AddTrack(ctx context.Context, track *domain.Track) (*domain.Track, error) {
+	cleanTN, err := utils.ValidateTrackName(track.TrackName)
 	if err != nil {
 		return nil, err
 	}
 
-	track := &domain.Track{
-		TrackID:    uuid.New(),
-		TrackName:  cleanTN,
-		ArtistID:   artistUUID,
-		AlbumID:    albumUUID,
-		Explicit:   explicit,
-		CreatedAt:  time.Now(),
-		Path:       path,
-		DurationMS: durationMS,
+	cleanAN, err := utils.ValidateAlbumName(track.AlbumName)
+	if err != nil {
+		return nil, err
 	}
+
+	cleanARN, err := utils.ValidateArtistName(track.ArtistName)
+	if err != nil {
+		return nil, err
+	}
+
+	track.TrackName = cleanTN
+	track.AlbumName = cleanAN
+	track.ArtistName = cleanARN
+	track.TrackID = uuid.New()
+	track.CreatedAt = time.Now()
 	if err := t.repo.AddTrack(ctx, track); err != nil {
 		return nil, err
 	}
@@ -71,4 +76,8 @@ func (t *TrackUseCase) AddTrack(ctx context.Context, trackName string, artistUUI
 
 func (t *TrackUseCase) IncrementListened(ctx context.Context, trackUUID uuid.UUID) error {
 	return t.repo.IncrementListened(ctx, trackUUID)
+}
+
+func (t *TrackUseCase) SetTrackCover(ctx context.Context, trackUUID uuid.UUID, coverPath string) error {
+	return t.repo.SetTrackCover(ctx, trackUUID, coverPath)
 }

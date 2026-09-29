@@ -248,6 +248,7 @@ type Album struct {
 	ArtistUuid    string                 `protobuf:"bytes,2,opt,name=artist_uuid,json=artistUuid,proto3" json:"artist_uuid,omitempty"`
 	AlbumName     string                 `protobuf:"bytes,3,opt,name=album_name,json=albumName,proto3" json:"album_name,omitempty"`
 	CreatedAt     string                 `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	CoverPath     string                 `protobuf:"bytes,5,opt,name=cover_path,json=coverPath,proto3" json:"cover_path,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -306,6 +307,13 @@ func (x *Album) GetAlbumName() string {
 func (x *Album) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *Album) GetCoverPath() string {
+	if x != nil {
+		return x.CoverPath
 	}
 	return ""
 }
@@ -794,6 +802,7 @@ type GetTrackByIDResponse struct {
 	Path          string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
 	DurationMs    int32                  `protobuf:"varint,2,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
 	Explicit      bool                   `protobuf:"varint,3,opt,name=explicit,proto3" json:"explicit,omitempty"`
+	AlbumUuid     string                 `protobuf:"bytes,4,opt,name=album_uuid,json=albumUuid,proto3" json:"album_uuid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -847,6 +856,13 @@ func (x *GetTrackByIDResponse) GetExplicit() bool {
 		return x.Explicit
 	}
 	return false
+}
+
+func (x *GetTrackByIDResponse) GetAlbumUuid() string {
+	if x != nil {
+		return x.AlbumUuid
+	}
+	return ""
 }
 
 type TrackExistsRequest struct {
@@ -1501,6 +1517,7 @@ type AddAlbumRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ArtistUuid    string                 `protobuf:"bytes,1,opt,name=artist_uuid,json=artistUuid,proto3" json:"artist_uuid,omitempty"`
 	AlbumName     string                 `protobuf:"bytes,2,opt,name=album_name,json=albumName,proto3" json:"album_name,omitempty"`
+	CoverPath     string                 `protobuf:"bytes,3,opt,name=cover_path,json=coverPath,proto3" json:"cover_path,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1545,6 +1562,13 @@ func (x *AddAlbumRequest) GetArtistUuid() string {
 func (x *AddAlbumRequest) GetAlbumName() string {
 	if x != nil {
 		return x.AlbumName
+	}
+	return ""
+}
+
+func (x *AddAlbumRequest) GetCoverPath() string {
+	if x != nil {
+		return x.CoverPath
 	}
 	return ""
 }
@@ -1599,8 +1623,9 @@ type AddTrackRequest struct {
 	ArtistUuid    string                 `protobuf:"bytes,2,opt,name=artist_uuid,json=artistUuid,proto3" json:"artist_uuid,omitempty"`
 	AlbumUuid     string                 `protobuf:"bytes,3,opt,name=album_uuid,json=albumUuid,proto3" json:"album_uuid,omitempty"`
 	Explicit      bool                   `protobuf:"varint,4,opt,name=explicit,proto3" json:"explicit,omitempty"`
-	Path          string                 `protobuf:"bytes,5,opt,name=path,proto3" json:"path,omitempty"`
-	DurationMs    int32                  `protobuf:"varint,6,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
+	TrackPath     string                 `protobuf:"bytes,5,opt,name=track_path,json=trackPath,proto3" json:"track_path,omitempty"`
+	CoverPath     string                 `protobuf:"bytes,6,opt,name=cover_path,json=coverPath,proto3" json:"cover_path,omitempty"`
+	DurationMs    int32                  `protobuf:"varint,7,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1663,9 +1688,16 @@ func (x *AddTrackRequest) GetExplicit() bool {
 	return false
 }
 
-func (x *AddTrackRequest) GetPath() string {
+func (x *AddTrackRequest) GetTrackPath() string {
 	if x != nil {
-		return x.Path
+		return x.TrackPath
+	}
+	return ""
+}
+
+func (x *AddTrackRequest) GetCoverPath() string {
+	if x != nil {
+		return x.CoverPath
 	}
 	return ""
 }
@@ -1684,8 +1716,9 @@ type AddTrackResponse struct {
 	ArtistUuid    string                 `protobuf:"bytes,3,opt,name=artist_uuid,json=artistUuid,proto3" json:"artist_uuid,omitempty"`
 	AlbumUuid     string                 `protobuf:"bytes,4,opt,name=album_uuid,json=albumUuid,proto3" json:"album_uuid,omitempty"`
 	Explicit      bool                   `protobuf:"varint,5,opt,name=explicit,proto3" json:"explicit,omitempty"`
-	Path          string                 `protobuf:"bytes,6,opt,name=path,proto3" json:"path,omitempty"`
-	DurationMs    int32                  `protobuf:"varint,7,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
+	TrackPath     string                 `protobuf:"bytes,6,opt,name=track_path,json=trackPath,proto3" json:"track_path,omitempty"`
+	CoverPath     string                 `protobuf:"bytes,7,opt,name=cover_path,json=coverPath,proto3" json:"cover_path,omitempty"`
+	DurationMs    int32                  `protobuf:"varint,8,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1755,9 +1788,16 @@ func (x *AddTrackResponse) GetExplicit() bool {
 	return false
 }
 
-func (x *AddTrackResponse) GetPath() string {
+func (x *AddTrackResponse) GetTrackPath() string {
 	if x != nil {
-		return x.Path
+		return x.TrackPath
+	}
+	return ""
+}
+
+func (x *AddTrackResponse) GetCoverPath() string {
+	if x != nil {
+		return x.CoverPath
 	}
 	return ""
 }
@@ -1909,6 +1949,185 @@ func (*AddTracksToAlbumResponse) Descriptor() ([]byte, []int) {
 	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{34}
 }
 
+// Обложка — собственность альбома: путь пишется альбому и всем его трекам,
+// чтобы обложка трека всегда совпадала с обложкой альбома (сингл = альбом
+// с одноимённым треком, файл один).
+type SetAlbumCoverRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AlbumUuid     string                 `protobuf:"bytes,1,opt,name=album_uuid,json=albumUuid,proto3" json:"album_uuid,omitempty"`
+	CoverPath     string                 `protobuf:"bytes,2,opt,name=cover_path,json=coverPath,proto3" json:"cover_path,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetAlbumCoverRequest) Reset() {
+	*x = SetAlbumCoverRequest{}
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetAlbumCoverRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetAlbumCoverRequest) ProtoMessage() {}
+
+func (x *SetAlbumCoverRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetAlbumCoverRequest.ProtoReflect.Descriptor instead.
+func (*SetAlbumCoverRequest) Descriptor() ([]byte, []int) {
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *SetAlbumCoverRequest) GetAlbumUuid() string {
+	if x != nil {
+		return x.AlbumUuid
+	}
+	return ""
+}
+
+func (x *SetAlbumCoverRequest) GetCoverPath() string {
+	if x != nil {
+		return x.CoverPath
+	}
+	return ""
+}
+
+type SetAlbumCoverResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetAlbumCoverResponse) Reset() {
+	*x = SetAlbumCoverResponse{}
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetAlbumCoverResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetAlbumCoverResponse) ProtoMessage() {}
+
+func (x *SetAlbumCoverResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetAlbumCoverResponse.ProtoReflect.Descriptor instead.
+func (*SetAlbumCoverResponse) Descriptor() ([]byte, []int) {
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{36}
+}
+
+type SetTrackCoverRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TrackUuid     string                 `protobuf:"bytes,1,opt,name=track_uuid,json=trackUuid,proto3" json:"track_uuid,omitempty"`
+	CoverPath     string                 `protobuf:"bytes,2,opt,name=cover_path,json=coverPath,proto3" json:"cover_path,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetTrackCoverRequest) Reset() {
+	*x = SetTrackCoverRequest{}
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetTrackCoverRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetTrackCoverRequest) ProtoMessage() {}
+
+func (x *SetTrackCoverRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetTrackCoverRequest.ProtoReflect.Descriptor instead.
+func (*SetTrackCoverRequest) Descriptor() ([]byte, []int) {
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *SetTrackCoverRequest) GetTrackUuid() string {
+	if x != nil {
+		return x.TrackUuid
+	}
+	return ""
+}
+
+func (x *SetTrackCoverRequest) GetCoverPath() string {
+	if x != nil {
+		return x.CoverPath
+	}
+	return ""
+}
+
+type SetTrackCoverResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetTrackCoverResponse) Reset() {
+	*x = SetTrackCoverResponse{}
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetTrackCoverResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetTrackCoverResponse) ProtoMessage() {}
+
+func (x *SetTrackCoverResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetTrackCoverResponse.ProtoReflect.Descriptor instead.
+func (*SetTrackCoverResponse) Descriptor() ([]byte, []int) {
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{38}
+}
+
 type IncrementListenedRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TrackUuid     string                 `protobuf:"bytes,1,opt,name=track_uuid,json=trackUuid,proto3" json:"track_uuid,omitempty"`
@@ -1918,7 +2137,7 @@ type IncrementListenedRequest struct {
 
 func (x *IncrementListenedRequest) Reset() {
 	*x = IncrementListenedRequest{}
-	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[35]
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1930,7 +2149,7 @@ func (x *IncrementListenedRequest) String() string {
 func (*IncrementListenedRequest) ProtoMessage() {}
 
 func (x *IncrementListenedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[35]
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1943,7 +2162,7 @@ func (x *IncrementListenedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IncrementListenedRequest.ProtoReflect.Descriptor instead.
 func (*IncrementListenedRequest) Descriptor() ([]byte, []int) {
-	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{35}
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *IncrementListenedRequest) GetTrackUuid() string {
@@ -1961,7 +2180,7 @@ type IncrementListenedResponse struct {
 
 func (x *IncrementListenedResponse) Reset() {
 	*x = IncrementListenedResponse{}
-	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[36]
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1973,7 +2192,7 @@ func (x *IncrementListenedResponse) String() string {
 func (*IncrementListenedResponse) ProtoMessage() {}
 
 func (x *IncrementListenedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[36]
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1986,7 +2205,7 @@ func (x *IncrementListenedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IncrementListenedResponse.ProtoReflect.Descriptor instead.
 func (*IncrementListenedResponse) Descriptor() ([]byte, []int) {
-	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{36}
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{40}
 }
 
 var File_proto_catalog_v1_catalog_proto protoreflect.FileDescriptor
@@ -2024,7 +2243,7 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\vartist_uuid\x18\x01 \x01(\tR\n" +
 	"artistUuid\x12\x1f\n" +
 	"\vartist_name\x18\x02 \x01(\tR\n" +
-	"artistName\"\x85\x01\n" +
+	"artistName\"\xa4\x01\n" +
 	"\x05Album\x12\x1d\n" +
 	"\n" +
 	"album_uuid\x18\x01 \x01(\tR\talbumUuid\x12\x1f\n" +
@@ -2033,7 +2252,9 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\n" +
 	"album_name\x18\x03 \x01(\tR\talbumName\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x04 \x01(\tR\tcreatedAt\"i\n" +
+	"created_at\x18\x04 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"cover_path\x18\x05 \x01(\tR\tcoverPath\"i\n" +
 	"\n" +
 	"LightAlbum\x12\x1d\n" +
 	"\n" +
@@ -2072,12 +2293,14 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\rartist_albums\x18\x01 \x03(\v2\x16.catalog.v1.LightAlbumR\fartistAlbums\"4\n" +
 	"\x13GetTrackByIDRequest\x12\x1d\n" +
 	"\n" +
-	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"g\n" +
+	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"\x86\x01\n" +
 	"\x14GetTrackByIDResponse\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12\x1f\n" +
 	"\vduration_ms\x18\x02 \x01(\x05R\n" +
 	"durationMs\x12\x1a\n" +
-	"\bexplicit\x18\x03 \x01(\bR\bexplicit\"3\n" +
+	"\bexplicit\x18\x03 \x01(\bR\bexplicit\x12\x1d\n" +
+	"\n" +
+	"album_uuid\x18\x04 \x01(\tR\talbumUuid\"3\n" +
 	"\x12TrackExistsRequest\x12\x1d\n" +
 	"\n" +
 	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"-\n" +
@@ -2115,14 +2338,16 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\vartist_name\x18\x01 \x01(\tR\n" +
 	"artistName\"?\n" +
 	"\x11AddArtistResponse\x12*\n" +
-	"\x06artist\x18\x01 \x01(\v2\x12.catalog.v1.ArtistR\x06artist\"Q\n" +
+	"\x06artist\x18\x01 \x01(\v2\x12.catalog.v1.ArtistR\x06artist\"p\n" +
 	"\x0fAddAlbumRequest\x12\x1f\n" +
 	"\vartist_uuid\x18\x01 \x01(\tR\n" +
 	"artistUuid\x12\x1d\n" +
 	"\n" +
-	"album_name\x18\x02 \x01(\tR\talbumName\";\n" +
+	"album_name\x18\x02 \x01(\tR\talbumName\x12\x1d\n" +
+	"\n" +
+	"cover_path\x18\x03 \x01(\tR\tcoverPath\";\n" +
 	"\x10AddAlbumResponse\x12'\n" +
-	"\x05album\x18\x01 \x01(\v2\x11.catalog.v1.AlbumR\x05album\"\xc1\x01\n" +
+	"\x05album\x18\x01 \x01(\v2\x11.catalog.v1.AlbumR\x05album\"\xeb\x01\n" +
 	"\x0fAddTrackRequest\x12\x1d\n" +
 	"\n" +
 	"track_name\x18\x01 \x01(\tR\ttrackName\x12\x1f\n" +
@@ -2130,10 +2355,13 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"artistUuid\x12\x1d\n" +
 	"\n" +
 	"album_uuid\x18\x03 \x01(\tR\talbumUuid\x12\x1a\n" +
-	"\bexplicit\x18\x04 \x01(\bR\bexplicit\x12\x12\n" +
-	"\x04path\x18\x05 \x01(\tR\x04path\x12\x1f\n" +
-	"\vduration_ms\x18\x06 \x01(\x05R\n" +
-	"durationMs\"\xe1\x01\n" +
+	"\bexplicit\x18\x04 \x01(\bR\bexplicit\x12\x1d\n" +
+	"\n" +
+	"track_path\x18\x05 \x01(\tR\ttrackPath\x12\x1d\n" +
+	"\n" +
+	"cover_path\x18\x06 \x01(\tR\tcoverPath\x12\x1f\n" +
+	"\vduration_ms\x18\a \x01(\x05R\n" +
+	"durationMs\"\x8b\x02\n" +
 	"\x10AddTrackResponse\x12\x1d\n" +
 	"\n" +
 	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\x12\x1d\n" +
@@ -2143,9 +2371,12 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"artistUuid\x12\x1d\n" +
 	"\n" +
 	"album_uuid\x18\x04 \x01(\tR\talbumUuid\x12\x1a\n" +
-	"\bexplicit\x18\x05 \x01(\bR\bexplicit\x12\x12\n" +
-	"\x04path\x18\x06 \x01(\tR\x04path\x12\x1f\n" +
-	"\vduration_ms\x18\a \x01(\x05R\n" +
+	"\bexplicit\x18\x05 \x01(\bR\bexplicit\x12\x1d\n" +
+	"\n" +
+	"track_path\x18\x06 \x01(\tR\ttrackPath\x12\x1d\n" +
+	"\n" +
+	"cover_path\x18\a \x01(\tR\tcoverPath\x12\x1f\n" +
+	"\vduration_ms\x18\b \x01(\x05R\n" +
 	"durationMs\"L\n" +
 	"\x0fAlbumTrackInput\x12\x1d\n" +
 	"\n" +
@@ -2155,7 +2386,19 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\n" +
 	"album_uuid\x18\x01 \x01(\tR\talbumUuid\x123\n" +
 	"\x06tracks\x18\x02 \x03(\v2\x1b.catalog.v1.AlbumTrackInputR\x06tracks\"\x1a\n" +
-	"\x18AddTracksToAlbumResponse\"9\n" +
+	"\x18AddTracksToAlbumResponse\"T\n" +
+	"\x14SetAlbumCoverRequest\x12\x1d\n" +
+	"\n" +
+	"album_uuid\x18\x01 \x01(\tR\talbumUuid\x12\x1d\n" +
+	"\n" +
+	"cover_path\x18\x02 \x01(\tR\tcoverPath\"\x17\n" +
+	"\x15SetAlbumCoverResponse\"T\n" +
+	"\x14SetTrackCoverRequest\x12\x1d\n" +
+	"\n" +
+	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\x12\x1d\n" +
+	"\n" +
+	"cover_path\x18\x02 \x01(\tR\tcoverPath\"\x17\n" +
+	"\x15SetTrackCoverResponse\"9\n" +
 	"\x18IncrementListenedRequest\x12\x1d\n" +
 	"\n" +
 	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"\x1b\n" +
@@ -2169,13 +2412,15 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\x0fGetArtistAlbums\x12\".catalog.v1.GetArtistAlbumsRequest\x1a#.catalog.v1.GetArtistAlbumsResponse\x12Z\n" +
 	"\x0fGetArtistTracks\x12\".catalog.v1.GetArtistTracksRequest\x1a#.catalog.v1.GetArtistTracksResponse\x12Q\n" +
 	"\fGetAlbumByID\x12\x1f.catalog.v1.GetAlbumByIDRequest\x1a .catalog.v1.GetAlbumByIDResponse\x12W\n" +
-	"\x0eGetAlbumTracks\x12!.catalog.v1.GetAlbumTracksRequest\x1a\".catalog.v1.GetAlbumTracksResponse2\xae\x03\n" +
+	"\x0eGetAlbumTracks\x12!.catalog.v1.GetAlbumTracksRequest\x1a\".catalog.v1.GetAlbumTracksResponse2\xda\x04\n" +
 	"\x13CatalogWriteService\x12H\n" +
 	"\tAddArtist\x12\x1c.catalog.v1.AddArtistRequest\x1a\x1d.catalog.v1.AddArtistResponse\x12E\n" +
 	"\bAddAlbum\x12\x1b.catalog.v1.AddAlbumRequest\x1a\x1c.catalog.v1.AddAlbumResponse\x12E\n" +
 	"\bAddTrack\x12\x1b.catalog.v1.AddTrackRequest\x1a\x1c.catalog.v1.AddTrackResponse\x12]\n" +
 	"\x10AddTracksToAlbum\x12#.catalog.v1.AddTracksToAlbumRequest\x1a$.catalog.v1.AddTracksToAlbumResponse\x12`\n" +
-	"\x11IncrementListened\x12$.catalog.v1.IncrementListenedRequest\x1a%.catalog.v1.IncrementListenedResponseB)Z'privy_stream/proto/catalog/v1;catalogv1b\x06proto3"
+	"\x11IncrementListened\x12$.catalog.v1.IncrementListenedRequest\x1a%.catalog.v1.IncrementListenedResponse\x12T\n" +
+	"\rSetAlbumCover\x12 .catalog.v1.SetAlbumCoverRequest\x1a!.catalog.v1.SetAlbumCoverResponse\x12T\n" +
+	"\rSetTrackCover\x12 .catalog.v1.SetTrackCoverRequest\x1a!.catalog.v1.SetTrackCoverResponseB)Z'privy_stream/proto/catalog/v1;catalogv1b\x06proto3"
 
 var (
 	file_proto_catalog_v1_catalog_proto_rawDescOnce sync.Once
@@ -2189,7 +2434,7 @@ func file_proto_catalog_v1_catalog_proto_rawDescGZIP() []byte {
 	return file_proto_catalog_v1_catalog_proto_rawDescData
 }
 
-var file_proto_catalog_v1_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
+var file_proto_catalog_v1_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_proto_catalog_v1_catalog_proto_goTypes = []any{
 	(*Track)(nil),                     // 0: catalog.v1.Track
 	(*LightTrack)(nil),                // 1: catalog.v1.LightTrack
@@ -2226,8 +2471,12 @@ var file_proto_catalog_v1_catalog_proto_goTypes = []any{
 	(*AlbumTrackInput)(nil),           // 32: catalog.v1.AlbumTrackInput
 	(*AddTracksToAlbumRequest)(nil),   // 33: catalog.v1.AddTracksToAlbumRequest
 	(*AddTracksToAlbumResponse)(nil),  // 34: catalog.v1.AddTracksToAlbumResponse
-	(*IncrementListenedRequest)(nil),  // 35: catalog.v1.IncrementListenedRequest
-	(*IncrementListenedResponse)(nil), // 36: catalog.v1.IncrementListenedResponse
+	(*SetAlbumCoverRequest)(nil),      // 35: catalog.v1.SetAlbumCoverRequest
+	(*SetAlbumCoverResponse)(nil),     // 36: catalog.v1.SetAlbumCoverResponse
+	(*SetTrackCoverRequest)(nil),      // 37: catalog.v1.SetTrackCoverRequest
+	(*SetTrackCoverResponse)(nil),     // 38: catalog.v1.SetTrackCoverResponse
+	(*IncrementListenedRequest)(nil),  // 39: catalog.v1.IncrementListenedRequest
+	(*IncrementListenedResponse)(nil), // 40: catalog.v1.IncrementListenedResponse
 }
 var file_proto_catalog_v1_catalog_proto_depIdxs = []int32{
 	0,  // 0: catalog.v1.Playlist.tracks:type_name -> catalog.v1.Track
@@ -2255,23 +2504,27 @@ var file_proto_catalog_v1_catalog_proto_depIdxs = []int32{
 	28, // 22: catalog.v1.CatalogWriteService.AddAlbum:input_type -> catalog.v1.AddAlbumRequest
 	30, // 23: catalog.v1.CatalogWriteService.AddTrack:input_type -> catalog.v1.AddTrackRequest
 	33, // 24: catalog.v1.CatalogWriteService.AddTracksToAlbum:input_type -> catalog.v1.AddTracksToAlbumRequest
-	35, // 25: catalog.v1.CatalogWriteService.IncrementListened:input_type -> catalog.v1.IncrementListenedRequest
-	13, // 26: catalog.v1.CatalogService.GetTrackByID:output_type -> catalog.v1.GetTrackByIDResponse
-	15, // 27: catalog.v1.CatalogService.TrackExists:output_type -> catalog.v1.TrackExistsResponse
-	16, // 28: catalog.v1.CatalogService.SearchTrack:output_type -> catalog.v1.SearchTrackResponse
-	23, // 29: catalog.v1.CatalogService.GetArtistByID:output_type -> catalog.v1.GetArtistByIDResponse
-	19, // 30: catalog.v1.CatalogService.SearchArtist:output_type -> catalog.v1.SearchArtistResponse
-	11, // 31: catalog.v1.CatalogService.GetArtistAlbums:output_type -> catalog.v1.GetArtistAlbumsResponse
-	7,  // 32: catalog.v1.CatalogService.GetArtistTracks:output_type -> catalog.v1.GetArtistTracksResponse
-	25, // 33: catalog.v1.CatalogService.GetAlbumByID:output_type -> catalog.v1.GetAlbumByIDResponse
-	9,  // 34: catalog.v1.CatalogService.GetAlbumTracks:output_type -> catalog.v1.GetAlbumTracksResponse
-	27, // 35: catalog.v1.CatalogWriteService.AddArtist:output_type -> catalog.v1.AddArtistResponse
-	29, // 36: catalog.v1.CatalogWriteService.AddAlbum:output_type -> catalog.v1.AddAlbumResponse
-	31, // 37: catalog.v1.CatalogWriteService.AddTrack:output_type -> catalog.v1.AddTrackResponse
-	34, // 38: catalog.v1.CatalogWriteService.AddTracksToAlbum:output_type -> catalog.v1.AddTracksToAlbumResponse
-	36, // 39: catalog.v1.CatalogWriteService.IncrementListened:output_type -> catalog.v1.IncrementListenedResponse
-	26, // [26:40] is the sub-list for method output_type
-	12, // [12:26] is the sub-list for method input_type
+	39, // 25: catalog.v1.CatalogWriteService.IncrementListened:input_type -> catalog.v1.IncrementListenedRequest
+	35, // 26: catalog.v1.CatalogWriteService.SetAlbumCover:input_type -> catalog.v1.SetAlbumCoverRequest
+	37, // 27: catalog.v1.CatalogWriteService.SetTrackCover:input_type -> catalog.v1.SetTrackCoverRequest
+	13, // 28: catalog.v1.CatalogService.GetTrackByID:output_type -> catalog.v1.GetTrackByIDResponse
+	15, // 29: catalog.v1.CatalogService.TrackExists:output_type -> catalog.v1.TrackExistsResponse
+	16, // 30: catalog.v1.CatalogService.SearchTrack:output_type -> catalog.v1.SearchTrackResponse
+	23, // 31: catalog.v1.CatalogService.GetArtistByID:output_type -> catalog.v1.GetArtistByIDResponse
+	19, // 32: catalog.v1.CatalogService.SearchArtist:output_type -> catalog.v1.SearchArtistResponse
+	11, // 33: catalog.v1.CatalogService.GetArtistAlbums:output_type -> catalog.v1.GetArtistAlbumsResponse
+	7,  // 34: catalog.v1.CatalogService.GetArtistTracks:output_type -> catalog.v1.GetArtistTracksResponse
+	25, // 35: catalog.v1.CatalogService.GetAlbumByID:output_type -> catalog.v1.GetAlbumByIDResponse
+	9,  // 36: catalog.v1.CatalogService.GetAlbumTracks:output_type -> catalog.v1.GetAlbumTracksResponse
+	27, // 37: catalog.v1.CatalogWriteService.AddArtist:output_type -> catalog.v1.AddArtistResponse
+	29, // 38: catalog.v1.CatalogWriteService.AddAlbum:output_type -> catalog.v1.AddAlbumResponse
+	31, // 39: catalog.v1.CatalogWriteService.AddTrack:output_type -> catalog.v1.AddTrackResponse
+	34, // 40: catalog.v1.CatalogWriteService.AddTracksToAlbum:output_type -> catalog.v1.AddTracksToAlbumResponse
+	40, // 41: catalog.v1.CatalogWriteService.IncrementListened:output_type -> catalog.v1.IncrementListenedResponse
+	36, // 42: catalog.v1.CatalogWriteService.SetAlbumCover:output_type -> catalog.v1.SetAlbumCoverResponse
+	38, // 43: catalog.v1.CatalogWriteService.SetTrackCover:output_type -> catalog.v1.SetTrackCoverResponse
+	28, // [28:44] is the sub-list for method output_type
+	12, // [12:28] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -2288,7 +2541,7 @@ func file_proto_catalog_v1_catalog_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_catalog_v1_catalog_proto_rawDesc), len(file_proto_catalog_v1_catalog_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   37,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

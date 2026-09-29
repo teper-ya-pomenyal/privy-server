@@ -23,7 +23,14 @@ func (h *CatalogWriteGRPCHandler) AddTrack(ctx context.Context, req *catalogv1.A
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, domain.ErrInvalidUUID.Error())
 	}
-	track, err := h.trackUseCase.AddTrack(ctx, req.TrackName, artistUUID, albumUUID, req.Explicit, req.Path, time.Duration(req.DurationMs))
+
+	trackReq := &domain.Track{
+		TrackName: req.TrackName, ArtistID: artistUUID,
+		AlbumID: albumUUID, Explicit: req.Explicit,
+		TrackPath: req.TrackPath, CoverPath: req.CoverPath,
+		DurationMS: time.Duration(req.DurationMs),
+	}
+	track, err := h.trackUseCase.AddTrack(ctx, trackReq)
 	if err != nil {
 		return nil, mapDomainError(err)
 	}
@@ -33,7 +40,8 @@ func (h *CatalogWriteGRPCHandler) AddTrack(ctx context.Context, req *catalogv1.A
 		ArtistUuid: track.ArtistID.String(),
 		AlbumUuid:  track.AlbumID.String(),
 		Explicit:   track.Explicit,
-		Path:       track.Path,
+		TrackPath:  track.TrackPath,
+		CoverPath:  track.CoverPath,
 		DurationMs: int32(track.DurationMS),
 	}, nil
 }

@@ -14,11 +14,11 @@ func (c *PostgresCatalog) GetAlbumByID(ctx context.Context, albumUUID uuid.UUID)
 	var album domain.Album
 	err := c.pool.QueryRow(ctx, `
 		SELECT
-			album_id, artist_id, album_name, created_at
+			album_id, artist_id, album_name, created_at, COALESCE(cover_path, '')
 		FROM albums
 		WHERE album_id = $1
 		`, albumUUID,
-	).Scan(&album.AlbumUUID, &album.ArtistUUID, &album.AlbumName, &album.CreatedAt)
+	).Scan(&album.AlbumUUID, &album.ArtistUUID, &album.AlbumName, &album.CreatedAt, &album.CoverPath)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, domain.ErrAlbumNotFound
@@ -65,9 +65,9 @@ func (c *PostgresCatalog) GetAlbumTracks(ctx context.Context, albumUUID uuid.UUI
 func (c *PostgresCatalog) AddAlbum(ctx context.Context, album *domain.Album) error {
 	_, err := c.pool.Exec(ctx, `
 		INSERT INTO albums
-			(album_id, artist_id, album_name, created_at)
-		VALUES($1, $2, $3, $4)
-		`, album.AlbumUUID, album.ArtistUUID, album.AlbumName, album.CreatedAt)
+			(album_id, artist_id, album_name, created_at, cover_path)
+		VALUES($1, $2, $3, $4, $5)
+		`, album.AlbumUUID, album.ArtistUUID, album.AlbumName, album.CreatedAt, album.CoverPath)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {

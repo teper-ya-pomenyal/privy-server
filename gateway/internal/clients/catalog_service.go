@@ -29,6 +29,7 @@ type LightTrack struct {
 type TrackPath struct {
 	Path       string `json:"path"`
 	DurationMs int32  `json:"duration_ms"`
+	AlbumUUID  string `json:"album_uuid"`
 }
 
 type Artist struct {
@@ -47,6 +48,7 @@ type Album struct {
 	ArtistUUID string `json:"artist_uuid"`
 	AlbumName  string `json:"album_name"`
 	CreatedAt  string `json:"created_at"`
+	CoverPath  string `json:"cover_path"`
 }
 
 type TrackDetails struct {
@@ -93,7 +95,7 @@ func (c *CatalogClient) GetTrackByID(ctx context.Context, trackUUID string) (*Tr
 	if err != nil {
 		return nil, err
 	}
-	return &TrackPath{Path: res.Path, DurationMs: res.DurationMs}, nil
+	return &TrackPath{Path: res.Path, DurationMs: res.DurationMs, AlbumUUID: res.AlbumUuid}, nil
 }
 
 func (c *CatalogClient) TrackExists(ctx context.Context, trackUUID string) (bool, error) {
@@ -179,6 +181,7 @@ func (c *CatalogClient) GetAlbumByID(ctx context.Context, albumUUID string) (*Al
 		ArtistUUID: res.Album.ArtistUuid,
 		AlbumName:  res.Album.AlbumName,
 		CreatedAt:  res.Album.CreatedAt,
+		CoverPath:  res.Album.CoverPath,
 	}, nil
 }
 
@@ -212,6 +215,7 @@ func (c *CatalogClient) AddAlbum(ctx context.Context, artistUUID, albumName stri
 		ArtistUUID: res.Album.ArtistUuid,
 		AlbumName:  res.Album.AlbumName,
 		CreatedAt:  res.Album.CreatedAt,
+		CoverPath:  res.Album.CoverPath,
 	}, nil
 }
 
@@ -221,7 +225,7 @@ func (c *CatalogClient) AddTrack(ctx context.Context, trackName, artistUUID, alb
 		ArtistUuid: artistUUID,
 		AlbumUuid:  albumUUID,
 		Explicit:   explicit,
-		Path:       path,
+		TrackPath:  path,
 		DurationMs: durationMs,
 	})
 	if err != nil {
@@ -233,7 +237,7 @@ func (c *CatalogClient) AddTrack(ctx context.Context, trackName, artistUUID, alb
 		ArtistUUID: res.ArtistUuid,
 		AlbumUUID:  res.AlbumUuid,
 		Explicit:   res.Explicit,
-		Path:       res.Path,
+		Path:       res.TrackPath,
 		DurationMs: res.DurationMs,
 	}, nil
 }
@@ -244,6 +248,16 @@ func (c *CatalogClient) AddTracksToAlbum(ctx context.Context, albumUUID string, 
 		reqTracks = append(reqTracks, &catalogv1.AlbumTrackInput{TrackUuid: t.TrackUUID, Position: t.Position})
 	}
 	_, err := c.grpcWriteClient.AddTracksToAlbum(ctx, &catalogv1.AddTracksToAlbumRequest{AlbumUuid: albumUUID, Tracks: reqTracks})
+	return err
+}
+
+func (c *CatalogClient) SetTrackCover(ctx context.Context, trackUUID, coverPath string) error {
+	_, err := c.grpcWriteClient.SetTrackCover(ctx, &catalogv1.SetTrackCoverRequest{TrackUuid: trackUUID, CoverPath: coverPath})
+	return err
+}
+
+func (c *CatalogClient) SetAlbumCover(ctx context.Context, albumUUID, coverPath string) error {
+	_, err := c.grpcWriteClient.SetAlbumCover(ctx, &catalogv1.SetAlbumCoverRequest{AlbumUuid: albumUUID, CoverPath: coverPath})
 	return err
 }
 
