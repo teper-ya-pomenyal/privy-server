@@ -27,6 +27,7 @@ func (h *CatalogHandler) MountRoutes(r chi.Router, m *mw.MiddleWares) {
 		r.Post("/albums", h.AddAlbum)
 		r.Post("/albums/{album_uuid}/tracks", h.AddTracksToAlbum)
 		r.Post("/albums/{album_uuid}/cover", h.AddAlbumCover)
+		r.Delete("/albums/{album_uuid}", h.DeleteAlbum)
 
 		r.Post("/tracks", h.AddTrack)
 		r.Post("/tracks/{track_uuid}/file", h.AddTrackFile)

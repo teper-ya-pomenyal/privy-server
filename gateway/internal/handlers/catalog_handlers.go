@@ -425,6 +425,33 @@ func (h *CatalogHandler) DeleteTrack(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// DeleteAlbum удаляет альбом со всеми его треками: записи в БД, файлы треков
+// и файл обложки. Файлы убираются после записи в БД; сбой удаления файла
+// ответ не срывает — в БД ссылок на них уже нет.
+func (h *CatalogHandler) DeleteAlbum(w http.ResponseWriter, r *http.Request) {
+	albumUUID, err := uuid.Parse(chi.URLParam(r, "album_uuid"))
+	if err != nil {
+		http.Error(w, "invalid uuid", http.StatusBadRequest)
+		return
+	}
+	trackPaths, coverPath, err := h.catalogClient.DeleteAlbum(r.Context(), albumUUID.String())
+	if err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+	for _, p := range trackPaths {
+		if err := h.trackStorage.Remove(p); err != nil {
+			log.Printf("album %s: remove track file %q: %v", albumUUID, p, err)
+		}
+	}
+	if coverPath != "" {
+		if err := h.trackStorage.Remove(coverPath); err != nil {
+			log.Printf("album %s: remove cover %q: %v", albumUUID, coverPath, err)
+		}
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (h *CatalogHandler) IncrementListened(w http.ResponseWriter, r *http.Request) {
 	trackUUID := chi.URLParam(r, "track_uuid")
 	userID, ok := middlewares.UserIDFromContext(r.Context())

@@ -269,6 +269,16 @@ func (c *CatalogClient) DeleteTrack(ctx context.Context, trackUUID string) (stri
 	return res.TrackPath, nil
 }
 
+// DeleteAlbum удаляет альбом со всеми его треками и возвращает пути файлов
+// хранилища (файлы треков и обложка) — удаляет их gateway.
+func (c *CatalogClient) DeleteAlbum(ctx context.Context, albumUUID string) ([]string, string, error) {
+	res, err := c.grpcWriteClient.DeleteAlbum(ctx, &catalogv1.DeleteAlbumRequest{AlbumUuid: albumUUID})
+	if err != nil {
+		return nil, "", err
+	}
+	return res.TrackPaths, res.CoverPath, nil
+}
+
 func (c *CatalogClient) SetAlbumCover(ctx context.Context, albumUUID, coverPath string) error {
 	_, err := c.grpcWriteClient.SetAlbumCover(ctx, &catalogv1.SetAlbumCoverRequest{AlbumUuid: albumUUID, CoverPath: coverPath})
 	return err

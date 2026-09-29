@@ -499,6 +499,26 @@ paths:
           description: Missing or invalid authorization header
         '404':
           description: Album not found
+    delete:
+      summary: Удалить альбом
+      description: >
+        Удаляет альбом вместе со всеми его треками: позиции в трек-листе,
+        вхождения треков в плейлисты и файлы из хранилища (файлы треков и
+        обложка). Артист остаётся. Отменить нельзя.
+      operationId: deleteAlbum
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AlbumUuid'
+      responses:
+        '204':
+          description: Альбом удалён
+        '400':
+          description: Invalid album uuid
+        '401':
+          description: Missing or invalid authorization header
+        '404':
+          description: Album not found
 
   /catalog/albums/{album_uuid}/tracks:
     get:

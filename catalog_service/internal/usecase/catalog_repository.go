@@ -25,4 +25,5 @@ type CatalogRepository interface {
 	SetAlbumCover(ctx context.Context, albumUUID uuid.UUID, coverPath string) error
 	SetTrackCover(ctx context.Context, trackUUID uuid.UUID, coverPath string) error
 	DeleteTrack(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error)
+	DeleteAlbum(ctx context.Context, albumUUID uuid.UUID) (*domain.AlbumFiles, error)
 }

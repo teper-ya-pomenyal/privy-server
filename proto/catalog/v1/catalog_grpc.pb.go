@@ -433,6 +433,7 @@ const (
 	CatalogWriteService_SetAlbumCover_FullMethodName     = "/catalog.v1.CatalogWriteService/SetAlbumCover"
 	CatalogWriteService_SetTrackCover_FullMethodName     = "/catalog.v1.CatalogWriteService/SetTrackCover"
 	CatalogWriteService_DeleteTrack_FullMethodName       = "/catalog.v1.CatalogWriteService/DeleteTrack"
+	CatalogWriteService_DeleteAlbum_FullMethodName       = "/catalog.v1.CatalogWriteService/DeleteAlbum"
 )
 
 // CatalogWriteServiceClient is the client API for CatalogWriteService service.
@@ -450,6 +451,7 @@ type CatalogWriteServiceClient interface {
 	SetAlbumCover(ctx context.Context, in *SetAlbumCoverRequest, opts ...grpc.CallOption) (*SetAlbumCoverResponse, error)
 	SetTrackCover(ctx context.Context, in *SetTrackCoverRequest, opts ...grpc.CallOption) (*SetTrackCoverResponse, error)
 	DeleteTrack(ctx context.Context, in *DeleteTrackRequest, opts ...grpc.CallOption) (*DeleteTrackResponse, error)
+	DeleteAlbum(ctx context.Context, in *DeleteAlbumRequest, opts ...grpc.CallOption) (*DeleteAlbumResponse, error)
 }
 
 type catalogWriteServiceClient struct {
@@ -540,6 +542,16 @@ func (c *catalogWriteServiceClient) DeleteTrack(ctx context.Context, in *DeleteT
 	return out, nil
 }
 
+func (c *catalogWriteServiceClient) DeleteAlbum(ctx context.Context, in *DeleteAlbumRequest, opts ...grpc.CallOption) (*DeleteAlbumResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteAlbumResponse)
+	err := c.cc.Invoke(ctx, CatalogWriteService_DeleteAlbum_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CatalogWriteServiceServer is the server API for CatalogWriteService service.
 // All implementations must embed UnimplementedCatalogWriteServiceServer
 // for forward compatibility.
@@ -555,6 +567,7 @@ type CatalogWriteServiceServer interface {
 	SetAlbumCover(context.Context, *SetAlbumCoverRequest) (*SetAlbumCoverResponse, error)
 	SetTrackCover(context.Context, *SetTrackCoverRequest) (*SetTrackCoverResponse, error)
 	DeleteTrack(context.Context, *DeleteTrackRequest) (*DeleteTrackResponse, error)
+	DeleteAlbum(context.Context, *DeleteAlbumRequest) (*DeleteAlbumResponse, error)
 	mustEmbedUnimplementedCatalogWriteServiceServer()
 }
 
@@ -588,6 +601,9 @@ func (UnimplementedCatalogWriteServiceServer) SetTrackCover(context.Context, *Se
 }
 func (UnimplementedCatalogWriteServiceServer) DeleteTrack(context.Context, *DeleteTrackRequest) (*DeleteTrackResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteTrack not implemented")
+}
+func (UnimplementedCatalogWriteServiceServer) DeleteAlbum(context.Context, *DeleteAlbumRequest) (*DeleteAlbumResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteAlbum not implemented")
 }
 func (UnimplementedCatalogWriteServiceServer) mustEmbedUnimplementedCatalogWriteServiceServer() {}
 func (UnimplementedCatalogWriteServiceServer) testEmbeddedByValue()                             {}
@@ -754,6 +770,24 @@ func _CatalogWriteService_DeleteTrack_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogWriteService_DeleteAlbum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAlbumRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogWriteServiceServer).DeleteAlbum(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogWriteService_DeleteAlbum_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogWriteServiceServer).DeleteAlbum(ctx, req.(*DeleteAlbumRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CatalogWriteService_ServiceDesc is the grpc.ServiceDesc for CatalogWriteService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -792,6 +826,10 @@ var CatalogWriteService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTrack",
 			Handler:    _CatalogWriteService_DeleteTrack_Handler,
+		},
+		{
+			MethodName: "DeleteAlbum",
+			Handler:    _CatalogWriteService_DeleteAlbum_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

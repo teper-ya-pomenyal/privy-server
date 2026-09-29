@@ -82,3 +82,60 @@ func (c *PostgresCatalog) AddAlbum(ctx context.Context, album *domain.Album) err
 	}
 	return nil
 }
+
+// DeleteAlbum удаляет альбом вместе со всеми его треками и возвращает пути
+// файлов хранилища (файлы треков и обложка). Порядок в транзакции — от детей
+// к родителям: внешние ключи созданы без CASCADE. Треки, записанные в этот
+// альбом из чужих альбомов, только теряют позицию — сам трек принадлежит
+// своему альбому; позиции удаляемых треков снимаются в любых трек-листах.
+func (c *PostgresCatalog) DeleteAlbum(ctx context.Context, albumUUID uuid.UUID) (*domain.AlbumFiles, error) {
+	tx, err := c.pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	if _, err = tx.Exec(ctx, `DELETE FROM albums_tracks WHERE album_id = $1`, albumUUID); err != nil {
+		return nil, err
+	}
+	if _, err = tx.Exec(ctx, `DELETE FROM albums_tracks WHERE track_id IN (SELECT track_id FROM tracks WHERE album_id = $1)`, albumUUID); err != nil {
+		return nil, err
+	}
+	if _, err = tx.Exec(ctx, `DELETE FROM playlists_tracks WHERE track_id IN (SELECT track_id FROM tracks WHERE album_id = $1)`, albumUUID); err != nil {
+		return nil, err
+	}
+
+	rows, err := tx.Query(ctx, `DELETE FROM tracks WHERE album_id = $1 RETURNING path`, albumUUID)
+	if err != nil {
+		return nil, err
+	}
+	files := &domain.AlbumFiles{TrackPaths: []string{}}
+	for rows.Next() {
+		var path string
+		if err = rows.Scan(&path); err != nil {
+			rows.Close()
+			return nil, err
+		}
+		files.TrackPaths = append(files.TrackPaths, path)
+	}
+	rows.Close()
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	err = tx.QueryRow(ctx, `
+		DELETE FROM albums
+		WHERE album_id = $1
+		RETURNING COALESCE(cover_path, '')
+		`,
+		albumUUID,
+	).Scan(&files.CoverPath)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrAlbumNotFound
+		}
+		return nil, err
+	}
+
+	return files, tx.Commit(ctx)
+}

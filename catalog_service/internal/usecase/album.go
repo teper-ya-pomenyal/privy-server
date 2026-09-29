@@ -57,3 +57,7 @@ func (a *AlbumUseCase) AddTracksToAlbum(ctx context.Context, tracks []domain.Alb
 func (a *AlbumUseCase) SetAlbumCover(ctx context.Context, albumUUID uuid.UUID, coverPath string) error {
 	return a.repo.SetAlbumCover(ctx, albumUUID, coverPath)
 }
+
+func (a *AlbumUseCase) DeleteAlbum(ctx context.Context, albumUUID uuid.UUID) (*domain.AlbumFiles, error) {
+	return a.repo.DeleteAlbum(ctx, albumUUID)
+}
