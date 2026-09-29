@@ -44,6 +44,11 @@ func main() {
 	register := usecase.NewRegisterUseCase(userRepo, tokenManager, userCache)
 	refresh := usecase.NewRefreshUseCase(userRepo, tokenManager, userCache)
 	logout := usecase.NewLogoutUseCase(userCache)
+	listSessions := usecase.NewListSessionsUseCase(userCache)
+	revokeSessions := usecase.NewRevokeSessionsUseCase(userCache)
+	listUsers := usecase.NewListUsersUseCase(userRepo)
+	setUserBlocked := usecase.NewSetUserBlockedUseCase(userRepo, userCache)
+	health := usecase.NewHealthUseCase(userRepo, userCache)
 
 	lis, err := net.Listen("tcp", ":"+cfg.Port)
 	if err != nil {
@@ -52,7 +57,7 @@ func main() {
 
 	interceptors := grpc.ChainUnaryInterceptor(handler.RecoveryInterceptor(), handler.LoggingInterceptor())
 	grpcServer := grpc.NewServer(interceptors)
-	userHandler := handler.NewUserGRPCHandler(login, register, refresh, logout)
+	userHandler := handler.NewUserGRPCHandler(login, register, refresh, logout, listSessions, revokeSessions, listUsers, setUserBlocked, health)
 
 	userv1.RegisterUserServiceServer(grpcServer, userHandler)
 
