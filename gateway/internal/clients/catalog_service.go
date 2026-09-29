@@ -288,3 +288,40 @@ func (c *CatalogClient) IncrementListened(ctx context.Context, trackUUID string)
 	_, err := c.grpcWriteClient.IncrementListened(ctx, &catalogv1.IncrementListenedRequest{TrackUuid: trackUUID})
 	return err
 }
+
+// Admin: страница треков каталога для модерации меток с общим счётчиком.
+func (c *CatalogClient) ListTracks(ctx context.Context, explicitFilter, limit, offset int32) ([]Track, int32, error) {
+	res, err := c.grpcClient.ListTracks(ctx, &catalogv1.ListTracksRequest{ExplicitFilter: explicitFilter, Limit: limit, Offset: offset})
+	if err != nil {
+		return nil, 0, err
+	}
+	tracks := make([]Track, 0, len(res.Tracks))
+	for _, t := range res.Tracks {
+		tracks = append(tracks, Track{
+			TrackUUID:  t.TrackUuid,
+			TrackName:  t.TrackName,
+			ArtistUUID: t.ArtistUuid,
+			ArtistName: t.ArtistName,
+			AlbumUUID:  t.AlbumUuid,
+			AlbumName:  t.AlbumName,
+			Explicit:   t.Explicit,
+			DurationMs: t.DurationMs,
+			CoverPath:  t.CoverPath,
+		})
+	}
+	return tracks, res.Total, nil
+}
+
+func (c *CatalogClient) SetTrackExplicit(ctx context.Context, trackUUID string, explicit bool) error {
+	_, err := c.grpcWriteClient.SetTrackExplicit(ctx, &catalogv1.SetTrackExplicitRequest{TrackUuid: trackUUID, Explicit: explicit})
+	return err
+}
+
+// Health возвращает доступность postgres в catalog_service.
+func (c *CatalogClient) Health(ctx context.Context) (postgres bool, err error) {
+	res, err := c.grpcClient.Health(ctx, &catalogv1.HealthRequest{})
+	if err != nil {
+		return false, err
+	}
+	return res.Postgres, nil
+}

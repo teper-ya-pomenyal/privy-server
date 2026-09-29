@@ -3,7 +3,8 @@ package middlewares
 import "github.com/teper-ya-pomenyal/privy_stream/jwtmanager"
 
 type MiddleWares struct {
-	Auth *authMiddleware
+	Auth  *authMiddleware
+	Owner *ownerMiddleware
 }
 
 func NewMiddleWares(verifier *jwtmanager.Verifier) *MiddleWares {
@@ -11,5 +12,6 @@ func NewMiddleWares(verifier *jwtmanager.Verifier) *MiddleWares {
 		Auth: &authMiddleware{
 			verifier: verifier,
 		},
+		Owner: &ownerMiddleware{},
 	}
 }

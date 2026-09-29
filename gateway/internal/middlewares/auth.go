@@ -16,6 +16,10 @@ type contextBirthDate string
 
 const BDKey contextBirthDate = "birthDate"
 
+type contextRole string
+
+const roleKey contextRole = "role"
+
 type authMiddleware struct {
 	verifier *jwtmanager.Verifier
 }
@@ -35,6 +39,7 @@ func (m *authMiddleware) Handle(next http.Handler) http.Handler {
 		}
 		ctx := context.WithValue(r.Context(), userIDKey, claims.Subject)
 		ctx = context.WithValue(ctx, BDKey, claims.BirthDate)
+		ctx = context.WithValue(ctx, roleKey, claims.Role)
 
 		newReq := r.WithContext(ctx)
 		next.ServeHTTP(w, newReq)
@@ -45,4 +50,9 @@ func (m *authMiddleware) Handle(next http.Handler) http.Handler {
 func UserIDFromContext(ctx context.Context) (string, bool) {
 	userID, ok := ctx.Value(userIDKey).(string)
 	return userID, ok
+}
+
+func RoleFromContext(ctx context.Context) (string, bool) {
+	role, ok := ctx.Value(roleKey).(string)
+	return role, ok && role != ""
 }

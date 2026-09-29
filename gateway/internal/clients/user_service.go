@@ -22,6 +22,28 @@ type RefreshResult struct {
 	AccessToken  string `json:"access_token"`
 }
 
+// SessionEntry — активная refresh-сессия; session_id = SHA-256 refresh-токена,
+// сам токен из user_service не выходит.
+type SessionEntry struct {
+	SessionID string `json:"session_id"`
+	CreatedAt int64  `json:"created_at"` // unix seconds — последняя ротация
+	ExpiresAt int64  `json:"expires_at"` // unix seconds
+}
+
+type UserEntry struct {
+	UserUUID  string `json:"user_uuid"`
+	UserName  string `json:"user_name"`
+	Role      string `json:"role"`
+	Blocked   bool   `json:"blocked"`
+	BirthDate string `json:"birth_date"` // RFC3339
+	CreatedAt string `json:"created_at"` // RFC3339
+}
+
+type UsersPage struct {
+	Users []UserEntry `json:"users"`
+	Total int32       `json:"total"`
+}
+
 type UserClient struct {
 	conn       *grpc.ClientConn
 	grpcClient userv1.UserServiceClient
@@ -92,4 +114,60 @@ func (u *UserClient) Logout(ctx context.Context, refreshToken string) error {
 		return err
 	}
 	return nil
+}
+
+func (u *UserClient) ListSessions(ctx context.Context, userUUID string) ([]SessionEntry, error) {
+	res, err := u.grpcClient.ListSessions(ctx, &userv1.ListSessionsRequest{UserUuid: userUUID})
+	if err != nil {
+		return nil, err
+	}
+	sessions := make([]SessionEntry, 0, len(res.Sessions))
+	for _, s := range res.Sessions {
+		sessions = append(sessions, SessionEntry{SessionID: s.SessionId, CreatedAt: s.CreatedAt, ExpiresAt: s.ExpiresAt})
+	}
+	return sessions, nil
+}
+
+// RevokeSessions отзывает сессии пользователя: перечисленные sessionIDs либо,
+// если список пуст, все, кроме keepSessionID.
+func (u *UserClient) RevokeSessions(ctx context.Context, userUUID, keepSessionID string, sessionIDs []string) error {
+	_, err := u.grpcClient.RevokeSessions(ctx, &userv1.RevokeSessionsRequest{
+		UserUuid:      userUUID,
+		KeepSessionId: keepSessionID,
+		SessionIds:    sessionIDs,
+	})
+	return err
+}
+
+func (u *UserClient) ListUsers(ctx context.Context, limit, offset int32) (*UsersPage, error) {
+	res, err := u.grpcClient.ListUsers(ctx, &userv1.ListUsersRequest{Limit: limit, Offset: offset})
+	if err != nil {
+		return nil, err
+	}
+	users := make([]UserEntry, 0, len(res.Users))
+	for _, usr := range res.Users {
+		users = append(users, UserEntry{
+			UserUUID:  usr.UserUuid,
+			UserName:  usr.UserName,
+			Role:      usr.Role,
+			Blocked:   usr.Blocked,
+			BirthDate: usr.BirthDate.AsTime().Format(time.RFC3339),
+			CreatedAt: usr.CreatedAt.AsTime().Format(time.RFC3339),
+		})
+	}
+	return &UsersPage{Users: users, Total: res.Total}, nil
+}
+
+func (u *UserClient) SetUserBlocked(ctx context.Context, userUUID string, blocked bool) error {
+	_, err := u.grpcClient.SetUserBlocked(ctx, &userv1.SetUserBlockedRequest{UserUuid: userUUID, Blocked: blocked})
+	return err
+}
+
+// Health возвращает доступность postgres и redis (сессии) в user_service.
+func (u *UserClient) Health(ctx context.Context) (postgres, redis bool, err error) {
+	res, err := u.grpcClient.Health(ctx, &userv1.HealthRequest{})
+	if err != nil {
+		return false, false, err
+	}
+	return res.Postgres, res.Redis, nil
 }

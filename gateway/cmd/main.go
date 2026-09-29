@@ -55,14 +55,20 @@ func main() {
 	userHandler := handlers.NewUserHandler(userClient)
 	catalogHandler := handlers.NewCatalogHandler(catalogClient, trackStorage, listenLimiter)
 	streamingRouter := handlers.NewStreamingRouter(cfg.StreamingServiceAddress, mw)
+	adminLogs := handlers.NewAdminLogRing(500)
+	adminHandler := handlers.NewAdminHandler(userClient, catalogClient, adminLogs, cfg.StreamingServiceAddress, cfg.TrackStoragePath)
 
 	router := userHandler.NewRouter(mw, cfg.CORSAllowedOrigins)
 	catalogHandler.MountRoutes(router, mw)
+	adminHandler.MountRoutes(router, mw)
 	router.Mount("/", streamingRouter)
+	// Журнал gateway для GET /admin/logs: оборачиваем весь роутер после
+	// монтирования, чтобы буфер видел каждый запрос, включая /admin.
+	var root http.Handler = handlers.AdminAccessLog(adminLogs)(router)
 
 	srv := http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: router,
+		Handler: root,
 	}
 
 	go func() {

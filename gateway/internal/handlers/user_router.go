@@ -11,8 +11,8 @@ func (h *UserHandler) NewRouter(m *mw.MiddleWares, allowedOrigins []string) *chi
 	r := chi.NewRouter()
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: allowedOrigins,
-		AllowedHeaders: []string{"Authorization", "Content-Type"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"Authorization", "Content-Type", "Range", "Content-Range"},
+		AllowedMethods: []string{"GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"},
 	}))
 	r.Use(middleware.Logger)
 
