@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -94,5 +95,37 @@ func TestAddFileRejectsUnsafePath(t *testing.T) {
 	n, err := s.AddFile("album/track.mp3", strings.NewReader("data"))
 	if err != nil || n != 4 {
 		t.Fatalf("AddFile(valid) = %d, %v", n, err)
+	}
+}
+
+func TestOpen(t *testing.T) {
+	base := t.TempDir()
+	s := NewTrackStorage(base)
+	if _, err := s.AddFile("album/cover.jpg", strings.NewReader("jpeg-bytes")); err != nil {
+		t.Fatalf("AddFile: %v", err)
+	}
+
+	file, info, err := s.Open("album/cover.jpg")
+	if err != nil {
+		t.Fatalf("Open(valid) err = %v", err)
+	}
+	defer file.Close()
+	if info.Size() != 10 {
+		t.Errorf("Open(valid) size = %d, want 10", info.Size())
+	}
+	data, err := io.ReadAll(file)
+	if err != nil || string(data) != "jpeg-bytes" {
+		t.Errorf("Open(valid) content = %q, %v", data, err)
+	}
+
+	// Путь за пределами хранилища и каталог вместо файла — ErrInvalidPath,
+	// отсутствующий файл — обычная ошибка ФС (обрабатывается как 404).
+	for _, p := range []string{"../escape.mp3", "/abs.mp3", "", "album"} {
+		if _, _, err := s.Open(p); !errors.Is(err, ErrInvalidPath) {
+			t.Errorf("Open(%q) err = %v, want ErrInvalidPath", p, err)
+		}
+	}
+	if _, _, err := s.Open("album/missing.jpg"); err == nil || errors.Is(err, ErrInvalidPath) {
+		t.Errorf("Open(missing) err = %v, want fs error", err)
 	}
 }

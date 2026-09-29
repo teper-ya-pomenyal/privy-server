@@ -84,3 +84,25 @@ func (s *TrackStorage) AddFile(path string, r io.Reader) (int64, error) {
 
 	return io.Copy(file, r)
 }
+
+// Open открывает записанный ранее файл для отдачи клиенту. Путь валидируется
+// так же, как при записи: путь из базы может указывать за пределы хранилища.
+func (s *TrackStorage) Open(path string) (*os.File, os.FileInfo, error) {
+	if !filepath.IsLocal(path) {
+		return nil, nil, ErrInvalidPath
+	}
+	file, err := os.Open(filepath.Join(s.basePath, path))
+	if err != nil {
+		return nil, nil, err
+	}
+	info, err := file.Stat()
+	if err != nil {
+		file.Close()
+		return nil, nil, err
+	}
+	if info.IsDir() {
+		file.Close()
+		return nil, nil, ErrInvalidPath
+	}
+	return file, info, nil
+}

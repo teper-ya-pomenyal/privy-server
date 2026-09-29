@@ -6,7 +6,9 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -135,6 +137,56 @@ func (h *CatalogHandler) GetAlbumByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, res)
+}
+
+// Content-Type обложки по расширению. Файлы пишутся только с расширениями из
+// allowedImageExt, так что таблица полная; неизвестное расширение не переопределяет
+// автоопределение http.ServeContent.
+var coverContentTypes = map[string]string{
+	".jpg":  "image/jpeg",
+	".jpeg": "image/jpeg",
+	".png":  "image/png",
+	".webp": "image/webp",
+	".gif":  "image/gif",
+}
+
+// GetAlbumCover отдаёт файл обложки альбома (cover_path из метаданных) — вторая
+// половина фичи после POST .../cover. <img> не отправляет Authorization, поэтому
+// клиент забирает картинку авторизованным fetch, как и /stream.
+func (h *CatalogHandler) GetAlbumCover(w http.ResponseWriter, r *http.Request) {
+	albumUUID, err := uuid.Parse(chi.URLParam(r, "album_uuid"))
+	if err != nil {
+		http.Error(w, "invalid uuid", http.StatusBadRequest)
+		return
+	}
+	album, err := h.catalogClient.GetAlbumByID(r.Context(), albumUUID.String())
+	if err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+	if album.CoverPath == "" {
+		http.Error(w, "album has no cover", http.StatusNotFound)
+		return
+	}
+	file, info, err := h.trackStorage.Open(album.CoverPath)
+	if err != nil {
+		if errors.Is(err, storage.ErrInvalidPath) {
+			log.Printf("album %s has unsafe cover path %q, rejected", albumUUID, album.CoverPath)
+			http.Error(w, "invalid cover path", http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "cover file not found", http.StatusNotFound)
+		return
+	}
+	defer file.Close()
+
+	if ct, ok := coverContentTypes[strings.ToLower(filepath.Ext(album.CoverPath))]; ok {
+		w.Header().Set("Content-Type", ct)
+	}
+	// Имя файла генерируется заново при каждой загрузке, так что содержимое по
+	// одному пути не меняется — можно кэшировать.
+	w.Header().Set("Cache-Control", "private, max-age=3600")
+	http.ServeContent(w, r, filepath.Base(album.CoverPath), info.ModTime(), file)
 }
 
 func (h *CatalogHandler) GetAlbumTracks(w http.ResponseWriter, r *http.Request) {

@@ -526,6 +526,45 @@ paths:
           description: Track already in album, or position already taken
 
   /catalog/albums/{album_uuid}/cover:
+    get:
+      summary: Получить файл обложки альбома
+      description: >
+        Отдаёт содержимое файла по cover_path альбома (см. GET /catalog/albums/{album_uuid}).
+        Как GET /stream/{id}: <img> не отправляет Authorization, поэтому клиент
+        скачивает картинку авторизованным запросом и показывает из памяти.
+      operationId: getAlbumCover
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AlbumUuid'
+      responses:
+        '200':
+          description: Содержимое файла обложки
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid album uuid
+        '401':
+          description: Missing or invalid authorization header
+        '404':
+          description: Album not found, or album has no cover
+        '500':
+          description: Internal server error
     post:
       summary: Загрузить обложку альбома
       description: >
