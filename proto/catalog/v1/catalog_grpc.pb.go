@@ -28,6 +28,9 @@ const (
 	CatalogService_GetArtistTracks_FullMethodName = "/catalog.v1.CatalogService/GetArtistTracks"
 	CatalogService_GetAlbumByID_FullMethodName    = "/catalog.v1.CatalogService/GetAlbumByID"
 	CatalogService_GetAlbumTracks_FullMethodName  = "/catalog.v1.CatalogService/GetAlbumTracks"
+	CatalogService_ListTracks_FullMethodName      = "/catalog.v1.CatalogService/ListTracks"
+	CatalogService_Health_FullMethodName          = "/catalog.v1.CatalogService/Health"
+	CatalogService_GetLogs_FullMethodName         = "/catalog.v1.CatalogService/GetLogs"
 )
 
 // CatalogServiceClient is the client API for CatalogService service.
@@ -43,6 +46,13 @@ type CatalogServiceClient interface {
 	GetArtistTracks(ctx context.Context, in *GetArtistTracksRequest, opts ...grpc.CallOption) (*GetArtistTracksResponse, error)
 	GetAlbumByID(ctx context.Context, in *GetAlbumByIDRequest, opts ...grpc.CallOption) (*GetAlbumByIDResponse, error)
 	GetAlbumTracks(ctx context.Context, in *GetAlbumTracksRequest, opts ...grpc.CallOption) (*GetAlbumTracksResponse, error)
+	// Полный список треков каталога с пагинацией и фильтром по explicit
+	// (0 — все, 1 — только с меткой, 2 — только без метки), с общим счётчиком.
+	ListTracks(ctx context.Context, in *ListTracksRequest, opts ...grpc.CallOption) (*ListTracksResponse, error)
+	// Проверка зависимостей catalog_service: postgres.
+	Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error)
+	// Последние записи внутреннего журнала сервиса (кольцевой буфер в памяти).
+	GetLogs(ctx context.Context, in *GetLogsRequest, opts ...grpc.CallOption) (*GetLogsResponse, error)
 }
 
 type catalogServiceClient struct {
@@ -143,6 +153,36 @@ func (c *catalogServiceClient) GetAlbumTracks(ctx context.Context, in *GetAlbumT
 	return out, nil
 }
 
+func (c *catalogServiceClient) ListTracks(ctx context.Context, in *ListTracksRequest, opts ...grpc.CallOption) (*ListTracksResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListTracksResponse)
+	err := c.cc.Invoke(ctx, CatalogService_ListTracks_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *catalogServiceClient) Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HealthResponse)
+	err := c.cc.Invoke(ctx, CatalogService_Health_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *catalogServiceClient) GetLogs(ctx context.Context, in *GetLogsRequest, opts ...grpc.CallOption) (*GetLogsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetLogsResponse)
+	err := c.cc.Invoke(ctx, CatalogService_GetLogs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CatalogServiceServer is the server API for CatalogService service.
 // All implementations must embed UnimplementedCatalogServiceServer
 // for forward compatibility.
@@ -156,6 +196,13 @@ type CatalogServiceServer interface {
 	GetArtistTracks(context.Context, *GetArtistTracksRequest) (*GetArtistTracksResponse, error)
 	GetAlbumByID(context.Context, *GetAlbumByIDRequest) (*GetAlbumByIDResponse, error)
 	GetAlbumTracks(context.Context, *GetAlbumTracksRequest) (*GetAlbumTracksResponse, error)
+	// Полный список треков каталога с пагинацией и фильтром по explicit
+	// (0 — все, 1 — только с меткой, 2 — только без метки), с общим счётчиком.
+	ListTracks(context.Context, *ListTracksRequest) (*ListTracksResponse, error)
+	// Проверка зависимостей catalog_service: postgres.
+	Health(context.Context, *HealthRequest) (*HealthResponse, error)
+	// Последние записи внутреннего журнала сервиса (кольцевой буфер в памяти).
+	GetLogs(context.Context, *GetLogsRequest) (*GetLogsResponse, error)
 	mustEmbedUnimplementedCatalogServiceServer()
 }
 
@@ -192,6 +239,15 @@ func (UnimplementedCatalogServiceServer) GetAlbumByID(context.Context, *GetAlbum
 }
 func (UnimplementedCatalogServiceServer) GetAlbumTracks(context.Context, *GetAlbumTracksRequest) (*GetAlbumTracksResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAlbumTracks not implemented")
+}
+func (UnimplementedCatalogServiceServer) ListTracks(context.Context, *ListTracksRequest) (*ListTracksResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTracks not implemented")
+}
+func (UnimplementedCatalogServiceServer) Health(context.Context, *HealthRequest) (*HealthResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Health not implemented")
+}
+func (UnimplementedCatalogServiceServer) GetLogs(context.Context, *GetLogsRequest) (*GetLogsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetLogs not implemented")
 }
 func (UnimplementedCatalogServiceServer) mustEmbedUnimplementedCatalogServiceServer() {}
 func (UnimplementedCatalogServiceServer) testEmbeddedByValue()                        {}
@@ -376,6 +432,60 @@ func _CatalogService_GetAlbumTracks_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogService_ListTracks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTracksRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogServiceServer).ListTracks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogService_ListTracks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogServiceServer).ListTracks(ctx, req.(*ListTracksRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CatalogService_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogServiceServer).Health(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogService_Health_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogServiceServer).Health(ctx, req.(*HealthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CatalogService_GetLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetLogsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogServiceServer).GetLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogService_GetLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogServiceServer).GetLogs(ctx, req.(*GetLogsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CatalogService_ServiceDesc is the grpc.ServiceDesc for CatalogService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -419,6 +529,18 @@ var CatalogService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetAlbumTracks",
 			Handler:    _CatalogService_GetAlbumTracks_Handler,
 		},
+		{
+			MethodName: "ListTracks",
+			Handler:    _CatalogService_ListTracks_Handler,
+		},
+		{
+			MethodName: "Health",
+			Handler:    _CatalogService_Health_Handler,
+		},
+		{
+			MethodName: "GetLogs",
+			Handler:    _CatalogService_GetLogs_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "proto/catalog/v1/catalog.proto",
@@ -432,6 +554,7 @@ const (
 	CatalogWriteService_IncrementListened_FullMethodName = "/catalog.v1.CatalogWriteService/IncrementListened"
 	CatalogWriteService_SetAlbumCover_FullMethodName     = "/catalog.v1.CatalogWriteService/SetAlbumCover"
 	CatalogWriteService_SetTrackCover_FullMethodName     = "/catalog.v1.CatalogWriteService/SetTrackCover"
+	CatalogWriteService_SetTrackExplicit_FullMethodName  = "/catalog.v1.CatalogWriteService/SetTrackExplicit"
 	CatalogWriteService_DeleteTrack_FullMethodName       = "/catalog.v1.CatalogWriteService/DeleteTrack"
 	CatalogWriteService_DeleteAlbum_FullMethodName       = "/catalog.v1.CatalogWriteService/DeleteAlbum"
 )
@@ -450,6 +573,8 @@ type CatalogWriteServiceClient interface {
 	IncrementListened(ctx context.Context, in *IncrementListenedRequest, opts ...grpc.CallOption) (*IncrementListenedResponse, error)
 	SetAlbumCover(ctx context.Context, in *SetAlbumCoverRequest, opts ...grpc.CallOption) (*SetAlbumCoverResponse, error)
 	SetTrackCover(ctx context.Context, in *SetTrackCoverRequest, opts ...grpc.CallOption) (*SetTrackCoverResponse, error)
+	// Смена метки 18+ у существующего трека (модерация из админки).
+	SetTrackExplicit(ctx context.Context, in *SetTrackExplicitRequest, opts ...grpc.CallOption) (*SetTrackExplicitResponse, error)
 	DeleteTrack(ctx context.Context, in *DeleteTrackRequest, opts ...grpc.CallOption) (*DeleteTrackResponse, error)
 	DeleteAlbum(ctx context.Context, in *DeleteAlbumRequest, opts ...grpc.CallOption) (*DeleteAlbumResponse, error)
 }
@@ -532,6 +657,16 @@ func (c *catalogWriteServiceClient) SetTrackCover(ctx context.Context, in *SetTr
 	return out, nil
 }
 
+func (c *catalogWriteServiceClient) SetTrackExplicit(ctx context.Context, in *SetTrackExplicitRequest, opts ...grpc.CallOption) (*SetTrackExplicitResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetTrackExplicitResponse)
+	err := c.cc.Invoke(ctx, CatalogWriteService_SetTrackExplicit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *catalogWriteServiceClient) DeleteTrack(ctx context.Context, in *DeleteTrackRequest, opts ...grpc.CallOption) (*DeleteTrackResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteTrackResponse)
@@ -566,6 +701,8 @@ type CatalogWriteServiceServer interface {
 	IncrementListened(context.Context, *IncrementListenedRequest) (*IncrementListenedResponse, error)
 	SetAlbumCover(context.Context, *SetAlbumCoverRequest) (*SetAlbumCoverResponse, error)
 	SetTrackCover(context.Context, *SetTrackCoverRequest) (*SetTrackCoverResponse, error)
+	// Смена метки 18+ у существующего трека (модерация из админки).
+	SetTrackExplicit(context.Context, *SetTrackExplicitRequest) (*SetTrackExplicitResponse, error)
 	DeleteTrack(context.Context, *DeleteTrackRequest) (*DeleteTrackResponse, error)
 	DeleteAlbum(context.Context, *DeleteAlbumRequest) (*DeleteAlbumResponse, error)
 	mustEmbedUnimplementedCatalogWriteServiceServer()
@@ -598,6 +735,9 @@ func (UnimplementedCatalogWriteServiceServer) SetAlbumCover(context.Context, *Se
 }
 func (UnimplementedCatalogWriteServiceServer) SetTrackCover(context.Context, *SetTrackCoverRequest) (*SetTrackCoverResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetTrackCover not implemented")
+}
+func (UnimplementedCatalogWriteServiceServer) SetTrackExplicit(context.Context, *SetTrackExplicitRequest) (*SetTrackExplicitResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetTrackExplicit not implemented")
 }
 func (UnimplementedCatalogWriteServiceServer) DeleteTrack(context.Context, *DeleteTrackRequest) (*DeleteTrackResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteTrack not implemented")
@@ -752,6 +892,24 @@ func _CatalogWriteService_SetTrackCover_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogWriteService_SetTrackExplicit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetTrackExplicitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogWriteServiceServer).SetTrackExplicit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogWriteService_SetTrackExplicit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogWriteServiceServer).SetTrackExplicit(ctx, req.(*SetTrackExplicitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CatalogWriteService_DeleteTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteTrackRequest)
 	if err := dec(in); err != nil {
@@ -822,6 +980,10 @@ var CatalogWriteService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetTrackCover",
 			Handler:    _CatalogWriteService_SetTrackCover_Handler,
+		},
+		{
+			MethodName: "SetTrackExplicit",
+			Handler:    _CatalogWriteService_SetTrackExplicit_Handler,
 		},
 		{
 			MethodName: "DeleteTrack",

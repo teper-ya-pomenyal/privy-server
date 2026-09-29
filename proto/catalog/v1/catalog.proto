@@ -13,6 +13,16 @@ service CatalogService {
     rpc GetAlbumByID(GetAlbumByIDRequest) returns (GetAlbumByIDResponse); //✔️☑️
     rpc GetAlbumTracks(GetAlbumTracksRequest) returns (GetAlbumTracksResponse); //✔️☑️
 
+    // --- admin (в gateway закрыто RequireOwner) ---
+
+    // Полный список треков каталога с пагинацией и фильтром по explicit
+    // (0 — все, 1 — только с меткой, 2 — только без метки), с общим счётчиком.
+    rpc ListTracks(ListTracksRequest) returns (ListTracksResponse);
+    // Проверка зависимостей catalog_service: postgres.
+    rpc Health(HealthRequest) returns (HealthResponse);
+    // Последние записи внутреннего журнала сервиса (кольцевой буфер в памяти).
+    rpc GetLogs(GetLogsRequest) returns (GetLogsResponse);
+
 //  rpc GetPlaylistByID(GetPlaylistByIDRequest) returns (GetPlaylistByIDResponse);
 //  rpc SearchAlbum(SearchAlbumRequest) returns (SearchAlbumResponse);
 //  rpc SearchPlaylist(SearchPlaylistRequest) returns (SearchPlaylistResponse);
@@ -28,6 +38,8 @@ service CatalogWriteService {
     rpc IncrementListened(IncrementListenedRequest) returns (IncrementListenedResponse);
     rpc SetAlbumCover(SetAlbumCoverRequest) returns (SetAlbumCoverResponse);
     rpc SetTrackCover(SetTrackCoverRequest) returns (SetTrackCoverResponse);
+    // Смена метки 18+ у существующего трека (модерация из админки).
+    rpc SetTrackExplicit(SetTrackExplicitRequest) returns (SetTrackExplicitResponse);
     rpc DeleteTrack(DeleteTrackRequest) returns (DeleteTrackResponse);
     rpc DeleteAlbum(DeleteAlbumRequest) returns (DeleteAlbumResponse);
 }
@@ -313,3 +325,46 @@ message IncrementListenedRequest {
 }
 
 message IncrementListenedResponse {}
+
+// Фильтр explicit: 0 — все треки, 1 — только с меткой, 2 — только без метки.
+message ListTracksRequest {
+    int32 explicit_filter = 1;
+    int32 limit = 2;
+    int32 offset = 3;
+}
+
+message ListTracksResponse {
+    repeated Track tracks = 1;
+    int32 total = 2;
+}
+
+message SetTrackExplicitRequest {
+    string track_uuid = 1;
+    bool explicit = 2;
+}
+
+message SetTrackExplicitResponse {}
+
+message HealthRequest {}
+
+message HealthResponse {
+    bool postgres = 1;
+}
+
+message GetLogsRequest {
+    int32 limit = 1;
+}
+
+message LogEntry {
+    int64 at_ms = 1;
+    string level = 2; // INFO | WARN | ERROR
+    string method = 3; // HTTP-метод, если запись о запросе
+    string path = 4; // HTTP-путь или gRPC full method
+    string code = 5; // HTTP-статус или gRPC-код
+    int64 ms = 6;
+    string message = 7; // событие без HTTP-пар (panic, отказ)
+}
+
+message GetLogsResponse {
+    repeated LogEntry entries = 1;
+}

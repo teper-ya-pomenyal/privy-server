@@ -8,6 +8,20 @@ service UserService{
     rpc Login(LoginRequest) returns (LoginResponse);
     rpc Refresh(RefreshRequest) returns (RefreshResponse);
     rpc Logout(LogoutRequest) returns (LogoutResponse);
+
+    // --- admin (в gateway закрыто RequireOwner) ---
+
+    // Активные refresh-сессии пользователя. user_uuid приходит параметром,
+    // чтобы владелец узла видел сессии всех аккаунтов, а не только свои.
+    rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse);
+    // Отзыв сессий: либо перечисленные session_ids, либо все, кроме keep_session_id.
+    rpc RevokeSessions(RevokeSessionsRequest) returns (RevokeSessionsResponse);
+    rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+    rpc SetUserBlocked(SetUserBlockedRequest) returns (SetUserBlockedResponse);
+    // Проверка зависимостей user_service: postgres и redis (сессии).
+    rpc Health(HealthRequest) returns (HealthResponse);
+    // Последние записи внутреннего журнала сервиса (кольцевой буфер в памяти).
+    rpc GetLogs(GetLogsRequest) returns (GetLogsResponse);
 }
 
 message RefreshRequest {
@@ -50,4 +64,81 @@ message LoginResponse {
     string refresh_token = 2;
     string access_token = 3;
     google.protobuf.Timestamp birth_date = 4;
+}
+
+message ListSessionsRequest {
+    string user_uuid = 1;
+}
+
+// session_id — это SHA-256 refresh-токена (hex): сам токен не покидает
+// user_service, а владелец по нему всё равно может его отозвать.
+message SessionEntry {
+    string session_id = 1;
+    int64 created_at = 2; // unix seconds — последняя ротация токена
+    int64 expires_at = 3; // unix seconds — TTL refresh-токена
+}
+
+message ListSessionsResponse {
+    repeated SessionEntry sessions = 1;
+}
+
+message RevokeSessionsRequest {
+    string user_uuid = 1;
+    // Если задан keep_session_id — удалить все сессии, кроме него.
+    // Иначе удалить перечисленные session_ids.
+    string keep_session_id = 2;
+    repeated string session_ids = 3;
+}
+
+message RevokeSessionsResponse {}
+
+message ListUsersRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+}
+
+message UserEntry {
+    string user_uuid = 1;
+    string user_name = 2;
+    string role = 3;
+    bool blocked = 4;
+    google.protobuf.Timestamp birth_date = 5;
+    google.protobuf.Timestamp created_at = 6;
+}
+
+message ListUsersResponse {
+    repeated UserEntry users = 1;
+    int32 total = 2;
+}
+
+message SetUserBlockedRequest {
+    string user_uuid = 1;
+    bool blocked = 2;
+}
+
+message SetUserBlockedResponse {}
+
+message HealthRequest {}
+
+message HealthResponse {
+    bool postgres = 1;
+    bool redis = 2;
+}
+
+message GetLogsRequest {
+    int32 limit = 1;
+}
+
+message LogEntry {
+    int64 at_ms = 1;
+    string level = 2; // INFO | WARN | ERROR
+    string method = 3; // HTTP-метод, если запись о запросе
+    string path = 4; // HTTP-путь или gRPC full method
+    string code = 5; // HTTP-статус или gRPC-код
+    int64 ms = 6;
+    string message = 7; // событие без HTTP-пар (panic, отказ)
+}
+
+message GetLogsResponse {
+    repeated LogEntry entries = 1;
 }
