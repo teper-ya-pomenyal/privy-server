@@ -751,6 +751,9 @@ components:
           type: boolean
         duration_ms:
           type: integer
+        cover_path:
+          type: string
+          description: Путь файла обложки в хранилище; всегда совпадает с cover_path альбома, пустая строка — обложки нет
 
     LightTrack:
       type: object
@@ -776,6 +779,9 @@ components:
         album_uuid:
           type: string
           format: uuid
+        cover_path:
+          type: string
+          description: Путь файла обложки в хранилище; всегда совпадает с cover_path альбома, пустая строка — обложки нет
 
     TrackDetails:
       type: object

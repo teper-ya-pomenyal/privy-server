@@ -14,12 +14,12 @@ func (c *PostgresCatalog) GetTrackByID(ctx context.Context, trackUUID uuid.UUID)
 	trackPath := &domain.TrackPath{}
 
 	err := c.pool.QueryRow(ctx, `
-		SELECT path, duration_ms, explicit, album_id
+		SELECT path, duration_ms, explicit, album_id, COALESCE(cover_path, '')
 		FROM tracks
 		WHERE track_id = $1
 		`,
 		trackUUID,
-	).Scan(&trackPath.Path, &trackPath.DurationMS, &trackPath.Explicit, &trackPath.AlbumID)
+	).Scan(&trackPath.Path, &trackPath.DurationMS, &trackPath.Explicit, &trackPath.AlbumID, &trackPath.CoverPath)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, domain.ErrTrackNotFound

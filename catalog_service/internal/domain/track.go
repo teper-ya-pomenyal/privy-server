@@ -25,6 +25,7 @@ type TrackPath struct {
 	DurationMS time.Duration `db:"duration_ms"`
 	Explicit   bool          `db:"explicit"`
 	AlbumID    uuid.UUID     `db:"album_id"`
+	CoverPath  string        `db:"cover_path"`
 }
 
 type LightTrack struct {

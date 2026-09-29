@@ -40,6 +40,7 @@ message Track {
     string album_name = 6;
     bool explicit = 7;
     int32 duration_ms = 8;
+    string cover_path = 9;
 }
 
 
@@ -122,6 +123,7 @@ message GetTrackByIDResponse {
     int32 duration_ms = 2;
     bool explicit = 3;
     string album_uuid = 4;
+    string cover_path = 5;
 }
 
 

@@ -27,6 +27,7 @@ func (h *CatalogGRPCHandler) GetTrackByID(ctx context.Context, req *catalogv1.Ge
 		DurationMs: int32(trackPath.DurationMS),
 		Explicit:   trackPath.Explicit,
 		AlbumUuid:  trackPath.AlbumID.String(),
+		CoverPath:  trackPath.CoverPath,
 	}, nil
 }
 
@@ -61,6 +62,7 @@ func (h *CatalogGRPCHandler) SearchTrack(ctx context.Context, req *catalogv1.Sea
 			AlbumName:  t.AlbumName,
 			Explicit:   t.Explicit,
 			DurationMs: int32(t.DurationMS),
+			CoverPath:  t.CoverPath,
 		})
 	}
 	return &catalogv1.SearchTrackResponse{Tracks: respTracks}, nil

@@ -17,6 +17,7 @@ type Track struct {
 	AlbumName  string `json:"album_name"`
 	Explicit   bool   `json:"explicit"`
 	DurationMs int32  `json:"duration_ms"`
+	CoverPath  string `json:"cover_path"`
 }
 
 type LightTrack struct {
@@ -30,6 +31,7 @@ type TrackPath struct {
 	Path       string `json:"path"`
 	DurationMs int32  `json:"duration_ms"`
 	AlbumUUID  string `json:"album_uuid"`
+	CoverPath  string `json:"cover_path"`
 }
 
 type Artist struct {
@@ -95,7 +97,7 @@ func (c *CatalogClient) GetTrackByID(ctx context.Context, trackUUID string) (*Tr
 	if err != nil {
 		return nil, err
 	}
-	return &TrackPath{Path: res.Path, DurationMs: res.DurationMs, AlbumUUID: res.AlbumUuid}, nil
+	return &TrackPath{Path: res.Path, DurationMs: res.DurationMs, AlbumUUID: res.AlbumUuid, CoverPath: res.CoverPath}, nil
 }
 
 func (c *CatalogClient) TrackExists(ctx context.Context, trackUUID string) (bool, error) {
@@ -122,6 +124,7 @@ func (c *CatalogClient) SearchTrack(ctx context.Context, trackName string, limit
 			AlbumName:  t.AlbumName,
 			Explicit:   t.Explicit,
 			DurationMs: t.DurationMs,
+			CoverPath:  t.CoverPath,
 		})
 	}
 	return tracks, nil

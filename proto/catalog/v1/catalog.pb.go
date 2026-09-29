@@ -32,6 +32,7 @@ type Track struct {
 	AlbumName     string                 `protobuf:"bytes,6,opt,name=album_name,json=albumName,proto3" json:"album_name,omitempty"`
 	Explicit      bool                   `protobuf:"varint,7,opt,name=explicit,proto3" json:"explicit,omitempty"`
 	DurationMs    int32                  `protobuf:"varint,8,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
+	CoverPath     string                 `protobuf:"bytes,9,opt,name=cover_path,json=coverPath,proto3" json:"cover_path,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -120,6 +121,13 @@ func (x *Track) GetDurationMs() int32 {
 		return x.DurationMs
 	}
 	return 0
+}
+
+func (x *Track) GetCoverPath() string {
+	if x != nil {
+		return x.CoverPath
+	}
+	return ""
 }
 
 type LightTrack struct {
@@ -803,6 +811,7 @@ type GetTrackByIDResponse struct {
 	DurationMs    int32                  `protobuf:"varint,2,opt,name=duration_ms,json=durationMs,proto3" json:"duration_ms,omitempty"`
 	Explicit      bool                   `protobuf:"varint,3,opt,name=explicit,proto3" json:"explicit,omitempty"`
 	AlbumUuid     string                 `protobuf:"bytes,4,opt,name=album_uuid,json=albumUuid,proto3" json:"album_uuid,omitempty"`
+	CoverPath     string                 `protobuf:"bytes,5,opt,name=cover_path,json=coverPath,proto3" json:"cover_path,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -861,6 +870,13 @@ func (x *GetTrackByIDResponse) GetExplicit() bool {
 func (x *GetTrackByIDResponse) GetAlbumUuid() string {
 	if x != nil {
 		return x.AlbumUuid
+	}
+	return ""
+}
+
+func (x *GetTrackByIDResponse) GetCoverPath() string {
+	if x != nil {
+		return x.CoverPath
 	}
 	return ""
 }
@@ -2213,7 +2229,7 @@ var File_proto_catalog_v1_catalog_proto protoreflect.FileDescriptor
 const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\n" +
 	"\x1eproto/catalog/v1/catalog.proto\x12\n" +
-	"catalog.v1\"\x82\x02\n" +
+	"catalog.v1\"\xa1\x02\n" +
 	"\x05Track\x12\x1d\n" +
 	"\n" +
 	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\x12\x1d\n" +
@@ -2229,7 +2245,9 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"album_name\x18\x06 \x01(\tR\talbumName\x12\x1a\n" +
 	"\bexplicit\x18\a \x01(\bR\bexplicit\x12\x1f\n" +
 	"\vduration_ms\x18\b \x01(\x05R\n" +
-	"durationMs\"\x87\x01\n" +
+	"durationMs\x12\x1d\n" +
+	"\n" +
+	"cover_path\x18\t \x01(\tR\tcoverPath\"\x87\x01\n" +
 	"\n" +
 	"LightTrack\x12\x1d\n" +
 	"\n" +
@@ -2293,14 +2311,16 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\rartist_albums\x18\x01 \x03(\v2\x16.catalog.v1.LightAlbumR\fartistAlbums\"4\n" +
 	"\x13GetTrackByIDRequest\x12\x1d\n" +
 	"\n" +
-	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"\x86\x01\n" +
+	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"\xa5\x01\n" +
 	"\x14GetTrackByIDResponse\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12\x1f\n" +
 	"\vduration_ms\x18\x02 \x01(\x05R\n" +
 	"durationMs\x12\x1a\n" +
 	"\bexplicit\x18\x03 \x01(\bR\bexplicit\x12\x1d\n" +
 	"\n" +
-	"album_uuid\x18\x04 \x01(\tR\talbumUuid\"3\n" +
+	"album_uuid\x18\x04 \x01(\tR\talbumUuid\x12\x1d\n" +
+	"\n" +
+	"cover_path\x18\x05 \x01(\tR\tcoverPath\"3\n" +
 	"\x12TrackExistsRequest\x12\x1d\n" +
 	"\n" +
 	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"-\n" +
