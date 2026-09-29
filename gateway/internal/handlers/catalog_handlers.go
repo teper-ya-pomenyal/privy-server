@@ -410,6 +410,21 @@ func (h *CatalogHandler) AddAlbumCover(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"path": coverPath, "size": size})
 }
 
+// DeleteTrack удаляет трек из каталога и его файл из хранилища. Файл убирается
+// после записи в БД: осиротевший файл безопаснее ссылки на несуществующий файл.
+func (h *CatalogHandler) DeleteTrack(w http.ResponseWriter, r *http.Request) {
+	trackUUID := chi.URLParam(r, "track_uuid")
+	path, err := h.catalogClient.DeleteTrack(r.Context(), trackUUID)
+	if err != nil {
+		mapGRPCError(w, err)
+		return
+	}
+	if err := h.trackStorage.Remove(path); err != nil {
+		log.Printf("track %s: remove file %q: %v", trackUUID, path, err)
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (h *CatalogHandler) IncrementListened(w http.ResponseWriter, r *http.Request) {
 	trackUUID := chi.URLParam(r, "track_uuid")
 	userID, ok := middlewares.UserIDFromContext(r.Context())

@@ -154,6 +154,26 @@ paths:
           description: Missing or invalid authorization header
         '404':
           description: Track not found
+    delete:
+      summary: Удалить трек
+      description: >
+        Удаляет трек из каталога, его позицию в трек-листе альбома и вхождения
+        в плейлисты, а также файл из хранилища узла. Файл обложки не удаляется:
+        он принадлежит альбому и его остальным трекам.
+      operationId: deleteTrack
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TrackUuid'
+      responses:
+        '204':
+          description: Трек удалён
+        '400':
+          description: Invalid track uuid
+        '401':
+          description: Missing or invalid authorization header
+        '404':
+          description: Track not found
 
   /catalog/tracks/{track_uuid}/exists:
     get:

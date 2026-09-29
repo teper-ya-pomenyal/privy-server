@@ -432,6 +432,7 @@ const (
 	CatalogWriteService_IncrementListened_FullMethodName = "/catalog.v1.CatalogWriteService/IncrementListened"
 	CatalogWriteService_SetAlbumCover_FullMethodName     = "/catalog.v1.CatalogWriteService/SetAlbumCover"
 	CatalogWriteService_SetTrackCover_FullMethodName     = "/catalog.v1.CatalogWriteService/SetTrackCover"
+	CatalogWriteService_DeleteTrack_FullMethodName       = "/catalog.v1.CatalogWriteService/DeleteTrack"
 )
 
 // CatalogWriteServiceClient is the client API for CatalogWriteService service.
@@ -448,6 +449,7 @@ type CatalogWriteServiceClient interface {
 	IncrementListened(ctx context.Context, in *IncrementListenedRequest, opts ...grpc.CallOption) (*IncrementListenedResponse, error)
 	SetAlbumCover(ctx context.Context, in *SetAlbumCoverRequest, opts ...grpc.CallOption) (*SetAlbumCoverResponse, error)
 	SetTrackCover(ctx context.Context, in *SetTrackCoverRequest, opts ...grpc.CallOption) (*SetTrackCoverResponse, error)
+	DeleteTrack(ctx context.Context, in *DeleteTrackRequest, opts ...grpc.CallOption) (*DeleteTrackResponse, error)
 }
 
 type catalogWriteServiceClient struct {
@@ -528,6 +530,16 @@ func (c *catalogWriteServiceClient) SetTrackCover(ctx context.Context, in *SetTr
 	return out, nil
 }
 
+func (c *catalogWriteServiceClient) DeleteTrack(ctx context.Context, in *DeleteTrackRequest, opts ...grpc.CallOption) (*DeleteTrackResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteTrackResponse)
+	err := c.cc.Invoke(ctx, CatalogWriteService_DeleteTrack_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CatalogWriteServiceServer is the server API for CatalogWriteService service.
 // All implementations must embed UnimplementedCatalogWriteServiceServer
 // for forward compatibility.
@@ -542,6 +554,7 @@ type CatalogWriteServiceServer interface {
 	IncrementListened(context.Context, *IncrementListenedRequest) (*IncrementListenedResponse, error)
 	SetAlbumCover(context.Context, *SetAlbumCoverRequest) (*SetAlbumCoverResponse, error)
 	SetTrackCover(context.Context, *SetTrackCoverRequest) (*SetTrackCoverResponse, error)
+	DeleteTrack(context.Context, *DeleteTrackRequest) (*DeleteTrackResponse, error)
 	mustEmbedUnimplementedCatalogWriteServiceServer()
 }
 
@@ -572,6 +585,9 @@ func (UnimplementedCatalogWriteServiceServer) SetAlbumCover(context.Context, *Se
 }
 func (UnimplementedCatalogWriteServiceServer) SetTrackCover(context.Context, *SetTrackCoverRequest) (*SetTrackCoverResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SetTrackCover not implemented")
+}
+func (UnimplementedCatalogWriteServiceServer) DeleteTrack(context.Context, *DeleteTrackRequest) (*DeleteTrackResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteTrack not implemented")
 }
 func (UnimplementedCatalogWriteServiceServer) mustEmbedUnimplementedCatalogWriteServiceServer() {}
 func (UnimplementedCatalogWriteServiceServer) testEmbeddedByValue()                             {}
@@ -720,6 +736,24 @@ func _CatalogWriteService_SetTrackCover_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CatalogWriteService_DeleteTrack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTrackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogWriteServiceServer).DeleteTrack(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CatalogWriteService_DeleteTrack_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogWriteServiceServer).DeleteTrack(ctx, req.(*DeleteTrackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CatalogWriteService_ServiceDesc is the grpc.ServiceDesc for CatalogWriteService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -754,6 +788,10 @@ var CatalogWriteService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetTrackCover",
 			Handler:    _CatalogWriteService_SetTrackCover_Handler,
+		},
+		{
+			MethodName: "DeleteTrack",
+			Handler:    _CatalogWriteService_DeleteTrack_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

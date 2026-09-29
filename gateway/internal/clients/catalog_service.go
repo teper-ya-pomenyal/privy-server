@@ -259,6 +259,16 @@ func (c *CatalogClient) SetTrackCover(ctx context.Context, trackUUID, coverPath 
 	return err
 }
 
+// DeleteTrack удаляет трек из каталога и возвращает путь его файла
+// в хранилище — файл удаляет gateway, у catalog_service тома нет.
+func (c *CatalogClient) DeleteTrack(ctx context.Context, trackUUID string) (string, error) {
+	res, err := c.grpcWriteClient.DeleteTrack(ctx, &catalogv1.DeleteTrackRequest{TrackUuid: trackUUID})
+	if err != nil {
+		return "", err
+	}
+	return res.TrackPath, nil
+}
+
 func (c *CatalogClient) SetAlbumCover(ctx context.Context, albumUUID, coverPath string) error {
 	_, err := c.grpcWriteClient.SetAlbumCover(ctx, &catalogv1.SetAlbumCoverRequest{AlbumUuid: albumUUID, CoverPath: coverPath})
 	return err

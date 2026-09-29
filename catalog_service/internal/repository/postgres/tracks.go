@@ -123,3 +123,39 @@ func (c *PostgresCatalog) IncrementListened(ctx context.Context, trackUUID uuid.
 	}
 	return nil
 }
+
+// DeleteTrack удаляет трек вместе с вхождениями в трек-листы и плейлисты —
+// внешние ключи на tracks созданы без CASCADE. Возвращает путь файла,
+// чтобы вызывающий убрал его из хранилища; обложка не трогается —
+// файл обложки принадлежит альбому и его остальным трекам.
+func (c *PostgresCatalog) DeleteTrack(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error) {
+	tx, err := c.pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	if _, err = tx.Exec(ctx, `DELETE FROM playlists_tracks WHERE track_id = $1`, trackUUID); err != nil {
+		return nil, err
+	}
+	if _, err = tx.Exec(ctx, `DELETE FROM albums_tracks WHERE track_id = $1`, trackUUID); err != nil {
+		return nil, err
+	}
+
+	var path string
+	err = tx.QueryRow(ctx, `
+		DELETE FROM tracks
+		WHERE track_id = $1
+		RETURNING path
+		`,
+		trackUUID,
+	).Scan(&path)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrTrackNotFound
+		}
+		return nil, err
+	}
+
+	return &domain.TrackPath{Path: path}, tx.Commit(ctx)
+}

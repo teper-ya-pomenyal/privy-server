@@ -28,6 +28,7 @@ service CatalogWriteService {
     rpc IncrementListened(IncrementListenedRequest) returns (IncrementListenedResponse);
     rpc SetAlbumCover(SetAlbumCoverRequest) returns (SetAlbumCoverResponse);
     rpc SetTrackCover(SetTrackCoverRequest) returns (SetTrackCoverResponse);
+    rpc DeleteTrack(DeleteTrackRequest) returns (DeleteTrackResponse);
 }
 
 // структуры для клиента
@@ -282,6 +283,17 @@ message SetTrackCoverRequest {
 }
 
 message SetTrackCoverResponse {}
+
+// Удаление трека: вместе с вхождениями в трек-листы и плейлисты.
+// Возвращает путь файла, чтобы gateway убрал его из хранилища
+// (обложка не трогается — файл обложки принадлежит альбому).
+message DeleteTrackRequest {
+    string track_uuid = 1;
+}
+
+message DeleteTrackResponse {
+    string track_path = 1;
+}
 
 message IncrementListenedRequest {
     string track_uuid = 1;

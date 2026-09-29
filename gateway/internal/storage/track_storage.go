@@ -106,3 +106,16 @@ func (s *TrackStorage) Open(path string) (*os.File, os.FileInfo, error) {
 	}
 	return file, info, nil
 }
+
+// Remove удаляет файл из хранилища. Отсутствующего файла нет и в базе быть
+// не должно (после сбоя загрузки запись ссылается на несозданный файл) —
+// это не ошибка.
+func (s *TrackStorage) Remove(path string) error {
+	if !filepath.IsLocal(path) {
+		return ErrInvalidPath
+	}
+	if err := os.Remove(filepath.Join(s.basePath, path)); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	return nil
+}

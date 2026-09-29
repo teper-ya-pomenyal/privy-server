@@ -129,3 +129,24 @@ func TestOpen(t *testing.T) {
 		t.Errorf("Open(missing) err = %v, want fs error", err)
 	}
 }
+
+func TestRemove(t *testing.T) {
+	base := t.TempDir()
+	s := NewTrackStorage(base)
+	if _, err := s.AddFile("album/track.mp3", strings.NewReader("data")); err != nil {
+		t.Fatalf("AddFile: %v", err)
+	}
+
+	// Отсутствующий файл не ошибка: запись в базе может ссылаться
+	// на файл, не созданный из-за сбоя загрузки.
+	for _, p := range []string{"album/missing.mp3", "album/track.mp3", "album/track.mp3"} {
+		if err := s.Remove(p); err != nil {
+			t.Errorf("Remove(%q) err = %v", p, err)
+		}
+	}
+	for _, p := range []string{"../escape.mp3", "/abs.mp3", ""} {
+		if err := s.Remove(p); !errors.Is(err, ErrInvalidPath) {
+			t.Errorf("Remove(%q) err = %v, want ErrInvalidPath", p, err)
+		}
+	}
+}

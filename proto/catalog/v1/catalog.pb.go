@@ -2144,6 +2144,97 @@ func (*SetTrackCoverResponse) Descriptor() ([]byte, []int) {
 	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{38}
 }
 
+// Удаление трека: вместе с вхождениями в трек-листы и плейлисты.
+// Возвращает путь файла, чтобы gateway убрал его из хранилища
+// (обложка не трогается — файл обложки принадлежит альбому).
+type DeleteTrackRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TrackUuid     string                 `protobuf:"bytes,1,opt,name=track_uuid,json=trackUuid,proto3" json:"track_uuid,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteTrackRequest) Reset() {
+	*x = DeleteTrackRequest{}
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTrackRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTrackRequest) ProtoMessage() {}
+
+func (x *DeleteTrackRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteTrackRequest.ProtoReflect.Descriptor instead.
+func (*DeleteTrackRequest) Descriptor() ([]byte, []int) {
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *DeleteTrackRequest) GetTrackUuid() string {
+	if x != nil {
+		return x.TrackUuid
+	}
+	return ""
+}
+
+type DeleteTrackResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TrackPath     string                 `protobuf:"bytes,1,opt,name=track_path,json=trackPath,proto3" json:"track_path,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteTrackResponse) Reset() {
+	*x = DeleteTrackResponse{}
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteTrackResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteTrackResponse) ProtoMessage() {}
+
+func (x *DeleteTrackResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteTrackResponse.ProtoReflect.Descriptor instead.
+func (*DeleteTrackResponse) Descriptor() ([]byte, []int) {
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *DeleteTrackResponse) GetTrackPath() string {
+	if x != nil {
+		return x.TrackPath
+	}
+	return ""
+}
+
 type IncrementListenedRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TrackUuid     string                 `protobuf:"bytes,1,opt,name=track_uuid,json=trackUuid,proto3" json:"track_uuid,omitempty"`
@@ -2153,7 +2244,7 @@ type IncrementListenedRequest struct {
 
 func (x *IncrementListenedRequest) Reset() {
 	*x = IncrementListenedRequest{}
-	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[39]
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2165,7 +2256,7 @@ func (x *IncrementListenedRequest) String() string {
 func (*IncrementListenedRequest) ProtoMessage() {}
 
 func (x *IncrementListenedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[39]
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2178,7 +2269,7 @@ func (x *IncrementListenedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IncrementListenedRequest.ProtoReflect.Descriptor instead.
 func (*IncrementListenedRequest) Descriptor() ([]byte, []int) {
-	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{39}
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *IncrementListenedRequest) GetTrackUuid() string {
@@ -2196,7 +2287,7 @@ type IncrementListenedResponse struct {
 
 func (x *IncrementListenedResponse) Reset() {
 	*x = IncrementListenedResponse{}
-	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[40]
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2208,7 +2299,7 @@ func (x *IncrementListenedResponse) String() string {
 func (*IncrementListenedResponse) ProtoMessage() {}
 
 func (x *IncrementListenedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[40]
+	mi := &file_proto_catalog_v1_catalog_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2221,7 +2312,7 @@ func (x *IncrementListenedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IncrementListenedResponse.ProtoReflect.Descriptor instead.
 func (*IncrementListenedResponse) Descriptor() ([]byte, []int) {
-	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{40}
+	return file_proto_catalog_v1_catalog_proto_rawDescGZIP(), []int{42}
 }
 
 var File_proto_catalog_v1_catalog_proto protoreflect.FileDescriptor
@@ -2418,7 +2509,13 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\x12\x1d\n" +
 	"\n" +
 	"cover_path\x18\x02 \x01(\tR\tcoverPath\"\x17\n" +
-	"\x15SetTrackCoverResponse\"9\n" +
+	"\x15SetTrackCoverResponse\"3\n" +
+	"\x12DeleteTrackRequest\x12\x1d\n" +
+	"\n" +
+	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"4\n" +
+	"\x13DeleteTrackResponse\x12\x1d\n" +
+	"\n" +
+	"track_path\x18\x01 \x01(\tR\ttrackPath\"9\n" +
 	"\x18IncrementListenedRequest\x12\x1d\n" +
 	"\n" +
 	"track_uuid\x18\x01 \x01(\tR\ttrackUuid\"\x1b\n" +
@@ -2432,7 +2529,7 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\x0fGetArtistAlbums\x12\".catalog.v1.GetArtistAlbumsRequest\x1a#.catalog.v1.GetArtistAlbumsResponse\x12Z\n" +
 	"\x0fGetArtistTracks\x12\".catalog.v1.GetArtistTracksRequest\x1a#.catalog.v1.GetArtistTracksResponse\x12Q\n" +
 	"\fGetAlbumByID\x12\x1f.catalog.v1.GetAlbumByIDRequest\x1a .catalog.v1.GetAlbumByIDResponse\x12W\n" +
-	"\x0eGetAlbumTracks\x12!.catalog.v1.GetAlbumTracksRequest\x1a\".catalog.v1.GetAlbumTracksResponse2\xda\x04\n" +
+	"\x0eGetAlbumTracks\x12!.catalog.v1.GetAlbumTracksRequest\x1a\".catalog.v1.GetAlbumTracksResponse2\xaa\x05\n" +
 	"\x13CatalogWriteService\x12H\n" +
 	"\tAddArtist\x12\x1c.catalog.v1.AddArtistRequest\x1a\x1d.catalog.v1.AddArtistResponse\x12E\n" +
 	"\bAddAlbum\x12\x1b.catalog.v1.AddAlbumRequest\x1a\x1c.catalog.v1.AddAlbumResponse\x12E\n" +
@@ -2440,7 +2537,8 @@ const file_proto_catalog_v1_catalog_proto_rawDesc = "" +
 	"\x10AddTracksToAlbum\x12#.catalog.v1.AddTracksToAlbumRequest\x1a$.catalog.v1.AddTracksToAlbumResponse\x12`\n" +
 	"\x11IncrementListened\x12$.catalog.v1.IncrementListenedRequest\x1a%.catalog.v1.IncrementListenedResponse\x12T\n" +
 	"\rSetAlbumCover\x12 .catalog.v1.SetAlbumCoverRequest\x1a!.catalog.v1.SetAlbumCoverResponse\x12T\n" +
-	"\rSetTrackCover\x12 .catalog.v1.SetTrackCoverRequest\x1a!.catalog.v1.SetTrackCoverResponseB)Z'privy_stream/proto/catalog/v1;catalogv1b\x06proto3"
+	"\rSetTrackCover\x12 .catalog.v1.SetTrackCoverRequest\x1a!.catalog.v1.SetTrackCoverResponse\x12N\n" +
+	"\vDeleteTrack\x12\x1e.catalog.v1.DeleteTrackRequest\x1a\x1f.catalog.v1.DeleteTrackResponseB)Z'privy_stream/proto/catalog/v1;catalogv1b\x06proto3"
 
 var (
 	file_proto_catalog_v1_catalog_proto_rawDescOnce sync.Once
@@ -2454,7 +2552,7 @@ func file_proto_catalog_v1_catalog_proto_rawDescGZIP() []byte {
 	return file_proto_catalog_v1_catalog_proto_rawDescData
 }
 
-var file_proto_catalog_v1_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
+var file_proto_catalog_v1_catalog_proto_msgTypes = make([]protoimpl.MessageInfo, 43)
 var file_proto_catalog_v1_catalog_proto_goTypes = []any{
 	(*Track)(nil),                     // 0: catalog.v1.Track
 	(*LightTrack)(nil),                // 1: catalog.v1.LightTrack
@@ -2495,8 +2593,10 @@ var file_proto_catalog_v1_catalog_proto_goTypes = []any{
 	(*SetAlbumCoverResponse)(nil),     // 36: catalog.v1.SetAlbumCoverResponse
 	(*SetTrackCoverRequest)(nil),      // 37: catalog.v1.SetTrackCoverRequest
 	(*SetTrackCoverResponse)(nil),     // 38: catalog.v1.SetTrackCoverResponse
-	(*IncrementListenedRequest)(nil),  // 39: catalog.v1.IncrementListenedRequest
-	(*IncrementListenedResponse)(nil), // 40: catalog.v1.IncrementListenedResponse
+	(*DeleteTrackRequest)(nil),        // 39: catalog.v1.DeleteTrackRequest
+	(*DeleteTrackResponse)(nil),       // 40: catalog.v1.DeleteTrackResponse
+	(*IncrementListenedRequest)(nil),  // 41: catalog.v1.IncrementListenedRequest
+	(*IncrementListenedResponse)(nil), // 42: catalog.v1.IncrementListenedResponse
 }
 var file_proto_catalog_v1_catalog_proto_depIdxs = []int32{
 	0,  // 0: catalog.v1.Playlist.tracks:type_name -> catalog.v1.Track
@@ -2524,27 +2624,29 @@ var file_proto_catalog_v1_catalog_proto_depIdxs = []int32{
 	28, // 22: catalog.v1.CatalogWriteService.AddAlbum:input_type -> catalog.v1.AddAlbumRequest
 	30, // 23: catalog.v1.CatalogWriteService.AddTrack:input_type -> catalog.v1.AddTrackRequest
 	33, // 24: catalog.v1.CatalogWriteService.AddTracksToAlbum:input_type -> catalog.v1.AddTracksToAlbumRequest
-	39, // 25: catalog.v1.CatalogWriteService.IncrementListened:input_type -> catalog.v1.IncrementListenedRequest
+	41, // 25: catalog.v1.CatalogWriteService.IncrementListened:input_type -> catalog.v1.IncrementListenedRequest
 	35, // 26: catalog.v1.CatalogWriteService.SetAlbumCover:input_type -> catalog.v1.SetAlbumCoverRequest
 	37, // 27: catalog.v1.CatalogWriteService.SetTrackCover:input_type -> catalog.v1.SetTrackCoverRequest
-	13, // 28: catalog.v1.CatalogService.GetTrackByID:output_type -> catalog.v1.GetTrackByIDResponse
-	15, // 29: catalog.v1.CatalogService.TrackExists:output_type -> catalog.v1.TrackExistsResponse
-	16, // 30: catalog.v1.CatalogService.SearchTrack:output_type -> catalog.v1.SearchTrackResponse
-	23, // 31: catalog.v1.CatalogService.GetArtistByID:output_type -> catalog.v1.GetArtistByIDResponse
-	19, // 32: catalog.v1.CatalogService.SearchArtist:output_type -> catalog.v1.SearchArtistResponse
-	11, // 33: catalog.v1.CatalogService.GetArtistAlbums:output_type -> catalog.v1.GetArtistAlbumsResponse
-	7,  // 34: catalog.v1.CatalogService.GetArtistTracks:output_type -> catalog.v1.GetArtistTracksResponse
-	25, // 35: catalog.v1.CatalogService.GetAlbumByID:output_type -> catalog.v1.GetAlbumByIDResponse
-	9,  // 36: catalog.v1.CatalogService.GetAlbumTracks:output_type -> catalog.v1.GetAlbumTracksResponse
-	27, // 37: catalog.v1.CatalogWriteService.AddArtist:output_type -> catalog.v1.AddArtistResponse
-	29, // 38: catalog.v1.CatalogWriteService.AddAlbum:output_type -> catalog.v1.AddAlbumResponse
-	31, // 39: catalog.v1.CatalogWriteService.AddTrack:output_type -> catalog.v1.AddTrackResponse
-	34, // 40: catalog.v1.CatalogWriteService.AddTracksToAlbum:output_type -> catalog.v1.AddTracksToAlbumResponse
-	40, // 41: catalog.v1.CatalogWriteService.IncrementListened:output_type -> catalog.v1.IncrementListenedResponse
-	36, // 42: catalog.v1.CatalogWriteService.SetAlbumCover:output_type -> catalog.v1.SetAlbumCoverResponse
-	38, // 43: catalog.v1.CatalogWriteService.SetTrackCover:output_type -> catalog.v1.SetTrackCoverResponse
-	28, // [28:44] is the sub-list for method output_type
-	12, // [12:28] is the sub-list for method input_type
+	39, // 28: catalog.v1.CatalogWriteService.DeleteTrack:input_type -> catalog.v1.DeleteTrackRequest
+	13, // 29: catalog.v1.CatalogService.GetTrackByID:output_type -> catalog.v1.GetTrackByIDResponse
+	15, // 30: catalog.v1.CatalogService.TrackExists:output_type -> catalog.v1.TrackExistsResponse
+	16, // 31: catalog.v1.CatalogService.SearchTrack:output_type -> catalog.v1.SearchTrackResponse
+	23, // 32: catalog.v1.CatalogService.GetArtistByID:output_type -> catalog.v1.GetArtistByIDResponse
+	19, // 33: catalog.v1.CatalogService.SearchArtist:output_type -> catalog.v1.SearchArtistResponse
+	11, // 34: catalog.v1.CatalogService.GetArtistAlbums:output_type -> catalog.v1.GetArtistAlbumsResponse
+	7,  // 35: catalog.v1.CatalogService.GetArtistTracks:output_type -> catalog.v1.GetArtistTracksResponse
+	25, // 36: catalog.v1.CatalogService.GetAlbumByID:output_type -> catalog.v1.GetAlbumByIDResponse
+	9,  // 37: catalog.v1.CatalogService.GetAlbumTracks:output_type -> catalog.v1.GetAlbumTracksResponse
+	27, // 38: catalog.v1.CatalogWriteService.AddArtist:output_type -> catalog.v1.AddArtistResponse
+	29, // 39: catalog.v1.CatalogWriteService.AddAlbum:output_type -> catalog.v1.AddAlbumResponse
+	31, // 40: catalog.v1.CatalogWriteService.AddTrack:output_type -> catalog.v1.AddTrackResponse
+	34, // 41: catalog.v1.CatalogWriteService.AddTracksToAlbum:output_type -> catalog.v1.AddTracksToAlbumResponse
+	42, // 42: catalog.v1.CatalogWriteService.IncrementListened:output_type -> catalog.v1.IncrementListenedResponse
+	36, // 43: catalog.v1.CatalogWriteService.SetAlbumCover:output_type -> catalog.v1.SetAlbumCoverResponse
+	38, // 44: catalog.v1.CatalogWriteService.SetTrackCover:output_type -> catalog.v1.SetTrackCoverResponse
+	40, // 45: catalog.v1.CatalogWriteService.DeleteTrack:output_type -> catalog.v1.DeleteTrackResponse
+	29, // [29:46] is the sub-list for method output_type
+	12, // [12:29] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -2561,7 +2663,7 @@ func file_proto_catalog_v1_catalog_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_catalog_v1_catalog_proto_rawDesc), len(file_proto_catalog_v1_catalog_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   41,
+			NumMessages:   43,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

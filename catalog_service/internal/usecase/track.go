@@ -81,3 +81,7 @@ func (t *TrackUseCase) IncrementListened(ctx context.Context, trackUUID uuid.UUI
 func (t *TrackUseCase) SetTrackCover(ctx context.Context, trackUUID uuid.UUID, coverPath string) error {
 	return t.repo.SetTrackCover(ctx, trackUUID, coverPath)
 }
+
+func (t *TrackUseCase) DeleteTrack(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error) {
+	return t.repo.DeleteTrack(ctx, trackUUID)
+}
