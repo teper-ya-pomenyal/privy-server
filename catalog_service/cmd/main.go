@@ -27,8 +27,9 @@ func main() {
 	trackUseCase := usecase.NewTrackUserCase(repo)
 	artistUseCase := usecase.NewArtistRepository(repo)
 	albumUseCase := usecase.NewAlbumUseCase(repo)
+	healthUseCase := usecase.NewHealthUseCase(repo)
 
-	catalogHandler := handler.NewCatalogGRPCHandler(trackUseCase, artistUseCase, albumUseCase)
+	catalogHandler := handler.NewCatalogGRPCHandler(trackUseCase, artistUseCase, albumUseCase, healthUseCase)
 	catalogWriteHandler := handler.NewCatalogWriteGRPCHandler(trackUseCase, artistUseCase, albumUseCase)
 
 	lis, err := net.Listen("tcp", ":"+cfg.Port)

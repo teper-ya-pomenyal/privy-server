@@ -159,3 +159,87 @@ func (c *PostgresCatalog) DeleteTrack(ctx context.Context, trackUUID uuid.UUID) 
 
 	return &domain.TrackPath{Path: path}, tx.Commit(ctx)
 }
+
+// ListTracks — полный список треков для модерации, с фильтром по explicit
+// (0 — все, 1 — только с меткой, 2 — только без) и общим счётчиком по фильтру.
+// Сортировка по created_at: новые релизы — первыми кандидаты на разметку.
+func (c *PostgresCatalog) ListTracks(ctx context.Context, explicitFilter, limit, offset int) ([]domain.Track, int, error) {
+	const selection = `
+		SELECT
+			t.track_id, t.track_name, t.artist_id, ar.artist_name,
+			COALESCE(t.cover_path, ''), t.album_id,
+			al.album_name, t.explicit, t.created_at, t.duration_ms,
+			COUNT(*) OVER() AS total
+		FROM tracks t
+		JOIN artists ar ON ar.artist_id = t.artist_id
+		JOIN albums al ON al.album_id = t.album_id
+		`
+
+	var (
+		rows pgx.Rows
+		err  error
+	)
+	switch explicitFilter {
+	case 0:
+		rows, err = c.pool.Query(ctx, selection+`
+			ORDER BY t.created_at, t.track_id
+			LIMIT $1 OFFSET $2
+			`, limit, offset)
+	case 1:
+		rows, err = c.pool.Query(ctx, selection+`
+			WHERE t.explicit = true
+			ORDER BY t.created_at, t.track_id
+			LIMIT $1 OFFSET $2
+			`, limit, offset)
+	case 2:
+		rows, err = c.pool.Query(ctx, selection+`
+			WHERE t.explicit = false
+			ORDER BY t.created_at, t.track_id
+			LIMIT $1 OFFSET $2
+			`, limit, offset)
+	}
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	tracks := []domain.Track{}
+	total := 0
+	for rows.Next() {
+		var t domain.Track
+		if err := rows.Scan(
+			&t.TrackID, &t.TrackName, &t.ArtistID, &t.ArtistName, &t.CoverPath,
+			&t.AlbumID, &t.AlbumName, &t.Explicit, &t.CreatedAt, &t.DurationMS,
+			&total,
+		); err != nil {
+			return nil, 0, err
+		}
+		tracks = append(tracks, t)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, 0, err
+	}
+	return tracks, total, nil
+}
+
+func (c *PostgresCatalog) SetTrackExplicit(ctx context.Context, trackUUID uuid.UUID, explicit bool) error {
+	res, err := c.pool.Exec(ctx, `
+		UPDATE tracks
+		SET explicit = $2
+		WHERE track_id = $1
+		`,
+		trackUUID, explicit,
+	)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return domain.ErrTrackNotFound
+	}
+	return nil
+}
+
+// Ping — проверка доступности postgres для health.
+func (c *PostgresCatalog) Ping(ctx context.Context) error {
+	return c.pool.Ping(ctx)
+}

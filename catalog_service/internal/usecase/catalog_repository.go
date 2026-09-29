@@ -26,4 +26,9 @@ type CatalogRepository interface {
 	SetTrackCover(ctx context.Context, trackUUID uuid.UUID, coverPath string) error
 	DeleteTrack(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error)
 	DeleteAlbum(ctx context.Context, albumUUID uuid.UUID) (*domain.AlbumFiles, error)
+	// Admin: список треков с фильтром explicit и общим счётчиком,
+	// смена метки 18+, проверка postgres для health.
+	ListTracks(ctx context.Context, explicitFilter, limit, offset int) ([]domain.Track, int, error)
+	SetTrackExplicit(ctx context.Context, trackUUID uuid.UUID, explicit bool) error
+	Ping(ctx context.Context) error
 }

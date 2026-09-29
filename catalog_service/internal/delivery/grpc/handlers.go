@@ -10,13 +10,15 @@ type CatalogGRPCHandler struct {
 	trackUseCase  *usecase.TrackUseCase
 	artistUseCase *usecase.ArtistUseCase
 	albumUseCase  *usecase.AlbumUseCase
+	healthUseCase *usecase.HealthUseCase
 }
 
-func NewCatalogGRPCHandler(trackUseCase *usecase.TrackUseCase, artistUseCase *usecase.ArtistUseCase, albumUseCase *usecase.AlbumUseCase) *CatalogGRPCHandler {
+func NewCatalogGRPCHandler(trackUseCase *usecase.TrackUseCase, artistUseCase *usecase.ArtistUseCase, albumUseCase *usecase.AlbumUseCase, healthUseCase *usecase.HealthUseCase) *CatalogGRPCHandler {
 	return &CatalogGRPCHandler{
 		trackUseCase:  trackUseCase,
 		artistUseCase: artistUseCase,
 		albumUseCase:  albumUseCase,
+		healthUseCase: healthUseCase,
 	}
 }
 

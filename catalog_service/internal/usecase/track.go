@@ -73,3 +73,18 @@ func (t *TrackUseCase) SetTrackCover(ctx context.Context, trackUUID uuid.UUID, c
 func (t *TrackUseCase) DeleteTrack(ctx context.Context, trackUUID uuid.UUID) (*domain.TrackPath, error) {
 	return t.repo.DeleteTrack(ctx, trackUUID)
 }
+
+// Admin: страница треков каталога для модерации меток.
+func (t *TrackUseCase) ListTracks(ctx context.Context, explicitFilter, limit, offset int) ([]domain.Track, int, error) {
+	if explicitFilter < 0 || explicitFilter > 2 {
+		return nil, 0, domain.ErrInvalidPageParameters
+	}
+	if limit < 1 || offset < 0 {
+		return nil, 0, domain.ErrInvalidPageParameters
+	}
+	return t.repo.ListTracks(ctx, explicitFilter, limit, offset)
+}
+
+func (t *TrackUseCase) SetTrackExplicit(ctx context.Context, trackUUID uuid.UUID, explicit bool) error {
+	return t.repo.SetTrackExplicit(ctx, trackUUID, explicit)
+}
