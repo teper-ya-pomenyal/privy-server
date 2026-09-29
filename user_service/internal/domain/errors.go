@@ -10,6 +10,7 @@ var (
 	ErrInvalidDate          = errors.New("invalid date")
 	ErrInvalidUUID          = errors.New("invalid uuid")
 	ErrUserBlocked          = errors.New("user is blocked")
+	ErrCannotBlockOwner     = errors.New("owner cannot be blocked")
 )
 
 var (

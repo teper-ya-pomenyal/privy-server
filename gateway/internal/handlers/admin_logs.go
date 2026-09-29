@@ -46,13 +46,19 @@ func (r *AdminLogRing) Latest(n int) []clients.LogEntry {
 }
 
 // AdminAccessLog оборачивает весь роутер gateway: каждый HTTP-запрос
-// попадает в кольцевой буфер с уровнем по итоговому статусу.
+// попадает в кольцевой буфер с уровнем по итоговому статусу. Собственный
+// поллинг админки (health/logs) в буфер не пишется — иначе он вытесняет
+// настоящие события из истории.
 func AdminAccessLog(ring *AdminLogRing) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			started := time.Now()
 			rec := &logStatusRecorder{ResponseWriter: w, status: http.StatusOK}
 			next.ServeHTTP(rec, req)
+
+			if req.URL.Path == "/admin/health" || req.URL.Path == "/admin/logs" {
+				return
+			}
 
 			ring.Add(clients.LogEntry{
 				At:      time.Now().UnixMilli(),

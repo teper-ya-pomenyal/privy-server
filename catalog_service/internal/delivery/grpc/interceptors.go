@@ -36,6 +36,11 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 			duration := time.Since(start)
 			code := status.Code(err)
 			log.Printf("method=%s duration=%s err=%v", info.FullMethod, duration, err)
+			// Health/GetLogs — собственный поллинг админки: в кольцевой буфер
+			// их не пишем, иначе шум вытесняет настоящие события из истории.
+			if isSelfPolling(info.FullMethod) {
+				return
+			}
 			requestLogs.Add(LogEntry{
 				AtMs:  nowMs(),
 				Level: levelForGRPCCode(code.String()),
@@ -48,4 +53,8 @@ func LoggingInterceptor() grpc.UnaryServerInterceptor {
 		resp, err = handler(ctx, req)
 		return resp, err
 	}
+}
+
+func isSelfPolling(fullMethod string) bool {
+	return fullMethod == "/catalog.v1.CatalogService/Health" || fullMethod == "/catalog.v1.CatalogService/GetLogs"
 }

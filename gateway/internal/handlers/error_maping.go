@@ -37,6 +37,8 @@ func mapGRPCError(w http.ResponseWriter, err error) {
 	switch st.Code() {
 	case codes.Unauthenticated:
 		httpStatus = http.StatusUnauthorized
+	case codes.PermissionDenied:
+		httpStatus = http.StatusForbidden
 	case codes.AlreadyExists:
 		httpStatus = http.StatusConflict
 	case codes.InvalidArgument:

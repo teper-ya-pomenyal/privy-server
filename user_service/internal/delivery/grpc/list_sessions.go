@@ -44,6 +44,9 @@ func (h *UserGRPCHandler) RevokeSessions(ctx context.Context, req *userv1.Revoke
 	if req.KeepSessionId == "" && len(req.SessionIds) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "keep_session_id or session_ids is required")
 	}
+	if req.KeepSessionId != "" && len(req.SessionIds) > 0 {
+		return nil, status.Error(codes.InvalidArgument, "keep_session_id and session_ids are mutually exclusive")
+	}
 	err = h.revokeSessionsUseCase.RevokeSessions(ctx, userUUID, req.KeepSessionId, req.SessionIds)
 	if err != nil {
 		return nil, mapDomainError(err)

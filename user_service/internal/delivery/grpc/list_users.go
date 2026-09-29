@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	userv1 "github.com/teper-ya-pomenyal/privy_stream/proto/user/v1"
@@ -54,6 +55,11 @@ func (h *UserGRPCHandler) SetUserBlocked(ctx context.Context, req *userv1.SetUse
 	}
 	err = h.setUserBlockedUseCase.SetBlocked(ctx, userUUID, req.Blocked)
 	if err != nil {
+		// В админ-операции нет логина: несуществующий аккаунт — 404, а не
+		// Unauthenticated (иначе gateway вернёт 401 и админка разлогинит владельца).
+		if errors.Is(err, domain.ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
 		return nil, mapDomainError(err)
 	}
 	return &userv1.SetUserBlockedResponse{}, nil

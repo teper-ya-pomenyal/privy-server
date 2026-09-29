@@ -116,7 +116,8 @@ func (h *AdminHandler) Health(w http.ResponseWriter, r *http.Request) {
 }
 
 // probeStreaming спрашивает у streaming_service заведомо несуществующий трек:
-// 404 значит, что сервис жив и сам сходил в каталог за ответом.
+// сервис разбирает заголовок X-Birth-Date до обращения в каталог, поэтому проба
+// ходит с взрослой датой; 404 в ответе значит, что сервис жив и дошёл до каталога.
 // Пустая строка — проверка пройдена.
 func probeStreaming(ctx context.Context, addr string) string {
 	url := fmt.Sprintf("http://%s/stream/00000000-0000-0000-0000-000000000000", addr)
@@ -124,14 +125,18 @@ func probeStreaming(ctx context.Context, addr string) string {
 	if err != nil {
 		return "не удалось сформировать запрос"
 	}
+	// без заголовка streaming_service ответит 400 ещё до каталога
+	req.Header.Set("X-Birth-Date", "1990-01-01")
 	client := &http.Client{Timeout: healthTimeout}
 	res, err := client.Do(req)
 	if err != nil {
 		return "нет ответа"
 	}
 	defer res.Body.Close()
-	if res.StatusCode == http.StatusNotFound || res.StatusCode == http.StatusOK || res.StatusCode == http.StatusPartialContent {
+	switch res.StatusCode {
+	case http.StatusNotFound, http.StatusOK, http.StatusPartialContent:
 		return ""
+	default:
+		return fmt.Sprintf("неожиданный ответ %d", res.StatusCode)
 	}
-	return fmt.Sprintf("неожиданный ответ %d", res.StatusCode)
 }

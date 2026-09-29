@@ -24,6 +24,8 @@ func mapDomainError(err error) error {
 		return status.Error(codes.Unauthenticated, err.Error())
 	case errors.Is(err, domain.ErrUserBlocked):
 		return status.Error(codes.PermissionDenied, err.Error())
+	case errors.Is(err, domain.ErrCannotBlockOwner):
+		return status.Error(codes.PermissionDenied, err.Error())
 	case errors.Is(err, domain.ErrInvalidUUID):
 		return status.Error(codes.InvalidArgument, err.Error())
 
