@@ -39,6 +39,11 @@ func (r *RefreshUseCase) Refresh(ctx context.Context, refreshToken string) (*Ref
 	if err != nil {
 		return &RefreshResult{}, err
 	}
+	// Заблокированный аккаунт не обновляет пару токенов: access истечёт сам,
+	// refresh отозван при блокировке.
+	if user.Blocked {
+		return &RefreshResult{}, domain.ErrUserBlocked
+	}
 
 	// make response
 	newRefreshToken, err := r.tokenManager.NewRefreshToken()
@@ -46,7 +51,7 @@ func (r *RefreshUseCase) Refresh(ctx context.Context, refreshToken string) (*Ref
 		return &RefreshResult{}, err
 	}
 
-	newAccessToken, err := r.tokenManager.NewAccessToken(userUUID, user.BirthDate)
+	newAccessToken, err := r.tokenManager.NewAccessToken(userUUID, user.BirthDate, user.Role)
 	if err != nil {
 		return &RefreshResult{}, err
 	}

@@ -54,6 +54,10 @@ func (l *LoginUseCase) Login(ctx context.Context, userName, password string) (*L
 		}
 		return nil, err
 	}
+	// Блокировка не выдаёт себя через неверный пароль — отвечает явно.
+	if user.Blocked {
+		return nil, domain.ErrUserBlocked
+	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 	if err != nil {
 		return nil, domain.ErrInvalidCredentials
@@ -61,7 +65,7 @@ func (l *LoginUseCase) Login(ctx context.Context, userName, password string) (*L
 
 	//make session
 
-	accessToken, err := l.tokenManager.NewAccessToken(user.UserUUID, user.BirthDate)
+	accessToken, err := l.tokenManager.NewAccessToken(user.UserUUID, user.BirthDate, user.Role)
 	if err != nil {
 		return nil, err
 	}

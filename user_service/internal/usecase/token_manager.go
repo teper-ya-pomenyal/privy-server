@@ -7,6 +7,6 @@ import (
 )
 
 type TokenManager interface {
-	NewAccessToken(userUUID uuid.UUID, birthDate time.Time) (string, error)
+	NewAccessToken(userUUID uuid.UUID, birthDate time.Time, role string) (string, error)
 	NewRefreshToken() (string, error)
 }

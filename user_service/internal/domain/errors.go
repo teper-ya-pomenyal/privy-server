@@ -8,6 +8,8 @@ var (
 	ErrUserAlreadyExists    = errors.New("user already exists")
 	ErrRefreshTokenNotFound = errors.New("refresh token not found")
 	ErrInvalidDate          = errors.New("invalid date")
+	ErrInvalidUUID          = errors.New("invalid uuid")
+	ErrUserBlocked          = errors.New("user is blocked")
 )
 
 var (

@@ -47,6 +47,16 @@ func (r *RegisterUseCase) Register(ctx context.Context, userName, password strin
 	if ok {
 		return &LoginResult{}, domain.ErrUserAlreadyExists
 	}
+	// Роль: самый первый аккаунт узла — его владелец. Гонки двух первых
+	// регистраций игнорируем: узел поднимает один человек.
+	role := domain.RoleUser
+	any, err := r.repo.AnyUserExists(ctx)
+	if err != nil {
+		return &LoginResult{}, err
+	}
+	if !any {
+		role = domain.RoleOwner
+	}
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(password), 10) //установил дефолтное значение для ясности - какое колличество рацндов хэширования.
 	if err != nil {
 		return &LoginResult{}, err
@@ -57,6 +67,7 @@ func (r *RegisterUseCase) Register(ctx context.Context, userName, password strin
 		UserName:     userName,
 		PasswordHash: string(hashPassword),
 		BirthDate:    birthDate,
+		Role:         role,
 		CreatedAt:    time.Now(),
 	}
 
@@ -67,7 +78,7 @@ func (r *RegisterUseCase) Register(ctx context.Context, userName, password strin
 
 	//make session
 
-	accessToken, err := r.tokenManager.NewAccessToken(newUser.UserUUID, newUser.BirthDate)
+	accessToken, err := r.tokenManager.NewAccessToken(newUser.UserUUID, newUser.BirthDate, newUser.Role)
 	if err != nil {
 		return &LoginResult{}, err
 	}
