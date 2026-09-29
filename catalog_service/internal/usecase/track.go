@@ -53,19 +53,7 @@ func (t *TrackUseCase) AddTrack(ctx context.Context, track *domain.Track) (*doma
 		return nil, err
 	}
 
-	cleanAN, err := utils.ValidateAlbumName(track.AlbumName)
-	if err != nil {
-		return nil, err
-	}
-
-	cleanARN, err := utils.ValidateArtistName(track.ArtistName)
-	if err != nil {
-		return nil, err
-	}
-
 	track.TrackName = cleanTN
-	track.AlbumName = cleanAN
-	track.ArtistName = cleanARN
 	track.TrackID = uuid.New()
 	track.CreatedAt = time.Now()
 	if err := t.repo.AddTrack(ctx, track); err != nil {
