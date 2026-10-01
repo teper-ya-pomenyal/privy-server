@@ -22,6 +22,16 @@ service UserService{
     rpc Health(HealthRequest) returns (HealthResponse);
     // Последние записи внутреннего журнала сервиса (кольцевой буфер в памяти).
     rpc GetLogs(GetLogsRequest) returns (GetLogsResponse);
+
+    rpc CreateStreamToken(CreateStreamTokenRequest) returns (CreateStreamTokenResponse);
+}
+
+message CreateStreamTokenRequest {
+    string user_uuid = 1;
+    google.protobuf.Timestamp birth_date = 2;
+}
+message CreateStreamTokenResponse {
+    string stream_token = 1;
 }
 
 message RefreshRequest {

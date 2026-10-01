@@ -54,10 +54,11 @@ func main() {
 
 	userHandler := handlers.NewUserHandler(userClient)
 	catalogHandler := handlers.NewCatalogHandler(catalogClient, trackStorage, listenLimiter)
-	streamingRouter := handlers.NewStreamingRouter(cfg.StreamingServiceAddress, mw)
 	adminLogs := handlers.NewAdminLogRing(500)
 	adminHandler := handlers.NewAdminHandler(userClient, catalogClient, adminLogs, cfg.StreamingServiceAddress, cfg.TrackStoragePath)
+	streamHandler := handlers.NewStreamingHandlers(userClient)
 
+	streamingRouter := streamHandler.NewStreamingRouter(cfg.StreamingServiceAddress, mw)
 	router := userHandler.NewRouter(mw, cfg.CORSAllowedOrigins)
 	catalogHandler.MountRoutes(router, mw)
 	adminHandler.MountRoutes(router, mw)

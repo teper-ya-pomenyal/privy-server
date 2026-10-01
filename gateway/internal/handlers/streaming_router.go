@@ -12,7 +12,7 @@ import (
 	mw "github.com/teper-ya-pomenyal/privy_stream/gateway/internal/middlewares"
 )
 
-func NewStreamingRouter(address string, m *mw.MiddleWares) *chi.Mux {
+func (h *StreamHandlers) NewStreamingRouter(address string, m *mw.MiddleWares) *chi.Mux {
 	target, err := url.Parse("http://" + address)
 	if err != nil {
 		log.Fatalln(err)
@@ -31,8 +31,14 @@ func NewStreamingRouter(address string, m *mw.MiddleWares) *chi.Mux {
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(m.Auth.Handle)
+	r.Group(func(r chi.Router) {
+		r.Use(m.Auth.Handle)
+		r.Post("/stream/token", h.CreateStreamToken)
+	})
 
-	r.Get("/stream/{id}", proxy.ServeHTTP)
+	r.Group(func(r chi.Router) {
+		r.Use(m.Auth.StreamAuth)
+		r.Get("/stream/{id}", proxy.ServeHTTP)
+	})
 	return r
 }

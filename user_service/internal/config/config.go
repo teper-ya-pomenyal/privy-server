@@ -13,6 +13,7 @@ type Config struct {
 	UserCacheDB    *UserDBCacheConfig
 	TTLRefresh     time.Duration
 	TTLAccess      time.Duration
+	TTLStream      time.Duration
 	PrivateKeyPath string
 }
 
@@ -20,6 +21,7 @@ func LoadConfig() *Config {
 
 	ttlRefresh := getIntEnvOrDefault("TTL_REFRESH_TIME", 604800)
 	ttlAccess := getIntEnvOrDefault("TTL_ACCESS_TIME", 900)
+	ttlStream := getIntEnvOrDefault("TTL_STREAM_TIME", 600)
 
 	port := getEnvOrDefault("PORT", "50051")
 	privateKey := getEnvOrDefault("PRIVATE_KEY_PATH", "keys/private.pem")
@@ -29,6 +31,7 @@ func LoadConfig() *Config {
 		UserCacheDB:    NewUserDBCacheConfig(),
 		TTLRefresh:     time.Duration(ttlRefresh) * time.Second,
 		TTLAccess:      time.Duration(ttlAccess) * time.Second,
+		TTLStream:      time.Duration(ttlStream) * time.Second,
 		PrivateKeyPath: privateKey,
 	}
 }

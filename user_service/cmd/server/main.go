@@ -38,7 +38,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	tokenManager := jwtmanager.NewManager(privateKey, cfg.TTLAccess)
+	tokenManager := jwtmanager.NewManager(privateKey, cfg.TTLAccess, cfg.TTLStream)
 
 	login := usecase.NewLoginUseCase(userRepo, tokenManager, userCache)
 	register := usecase.NewRegisterUseCase(userRepo, tokenManager, userCache)
@@ -49,6 +49,7 @@ func main() {
 	listUsers := usecase.NewListUsersUseCase(userRepo)
 	setUserBlocked := usecase.NewSetUserBlockedUseCase(userRepo, userCache)
 	health := usecase.NewHealthUseCase(userRepo, userCache)
+	streamToken := usecase.NewCreateStreamTokenUseCase(tokenManager)
 
 	lis, err := net.Listen("tcp", ":"+cfg.Port)
 	if err != nil {
@@ -57,7 +58,7 @@ func main() {
 
 	interceptors := grpc.ChainUnaryInterceptor(handler.RecoveryInterceptor(), handler.LoggingInterceptor())
 	grpcServer := grpc.NewServer(interceptors)
-	userHandler := handler.NewUserGRPCHandler(login, register, refresh, logout, listSessions, revokeSessions, listUsers, setUserBlocked, health)
+	userHandler := handler.NewUserGRPCHandler(login, register, refresh, logout, listSessions, revokeSessions, listUsers, setUserBlocked, health, streamToken)
 
 	userv1.RegisterUserServiceServer(grpcServer, userHandler)
 

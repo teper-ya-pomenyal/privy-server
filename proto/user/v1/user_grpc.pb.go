@@ -19,16 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_Register_FullMethodName       = "/user.v1.UserService/Register"
-	UserService_Login_FullMethodName          = "/user.v1.UserService/Login"
-	UserService_Refresh_FullMethodName        = "/user.v1.UserService/Refresh"
-	UserService_Logout_FullMethodName         = "/user.v1.UserService/Logout"
-	UserService_ListSessions_FullMethodName   = "/user.v1.UserService/ListSessions"
-	UserService_RevokeSessions_FullMethodName = "/user.v1.UserService/RevokeSessions"
-	UserService_ListUsers_FullMethodName      = "/user.v1.UserService/ListUsers"
-	UserService_SetUserBlocked_FullMethodName = "/user.v1.UserService/SetUserBlocked"
-	UserService_Health_FullMethodName         = "/user.v1.UserService/Health"
-	UserService_GetLogs_FullMethodName        = "/user.v1.UserService/GetLogs"
+	UserService_Register_FullMethodName          = "/user.v1.UserService/Register"
+	UserService_Login_FullMethodName             = "/user.v1.UserService/Login"
+	UserService_Refresh_FullMethodName           = "/user.v1.UserService/Refresh"
+	UserService_Logout_FullMethodName            = "/user.v1.UserService/Logout"
+	UserService_ListSessions_FullMethodName      = "/user.v1.UserService/ListSessions"
+	UserService_RevokeSessions_FullMethodName    = "/user.v1.UserService/RevokeSessions"
+	UserService_ListUsers_FullMethodName         = "/user.v1.UserService/ListUsers"
+	UserService_SetUserBlocked_FullMethodName    = "/user.v1.UserService/SetUserBlocked"
+	UserService_Health_FullMethodName            = "/user.v1.UserService/Health"
+	UserService_GetLogs_FullMethodName           = "/user.v1.UserService/GetLogs"
+	UserService_CreateStreamToken_FullMethodName = "/user.v1.UserService/CreateStreamToken"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -50,6 +51,7 @@ type UserServiceClient interface {
 	Health(ctx context.Context, in *HealthRequest, opts ...grpc.CallOption) (*HealthResponse, error)
 	// Последние записи внутреннего журнала сервиса (кольцевой буфер в памяти).
 	GetLogs(ctx context.Context, in *GetLogsRequest, opts ...grpc.CallOption) (*GetLogsResponse, error)
+	CreateStreamToken(ctx context.Context, in *CreateStreamTokenRequest, opts ...grpc.CallOption) (*CreateStreamTokenResponse, error)
 }
 
 type userServiceClient struct {
@@ -160,6 +162,16 @@ func (c *userServiceClient) GetLogs(ctx context.Context, in *GetLogsRequest, opt
 	return out, nil
 }
 
+func (c *userServiceClient) CreateStreamToken(ctx context.Context, in *CreateStreamTokenRequest, opts ...grpc.CallOption) (*CreateStreamTokenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateStreamTokenResponse)
+	err := c.cc.Invoke(ctx, UserService_CreateStreamToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -179,6 +191,7 @@ type UserServiceServer interface {
 	Health(context.Context, *HealthRequest) (*HealthResponse, error)
 	// Последние записи внутреннего журнала сервиса (кольцевой буфер в памяти).
 	GetLogs(context.Context, *GetLogsRequest) (*GetLogsResponse, error)
+	CreateStreamToken(context.Context, *CreateStreamTokenRequest) (*CreateStreamTokenResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -218,6 +231,9 @@ func (UnimplementedUserServiceServer) Health(context.Context, *HealthRequest) (*
 }
 func (UnimplementedUserServiceServer) GetLogs(context.Context, *GetLogsRequest) (*GetLogsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetLogs not implemented")
+}
+func (UnimplementedUserServiceServer) CreateStreamToken(context.Context, *CreateStreamTokenRequest) (*CreateStreamTokenResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateStreamToken not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -420,6 +436,24 @@ func _UserService_GetLogs_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_CreateStreamToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateStreamTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).CreateStreamToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_CreateStreamToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).CreateStreamToken(ctx, req.(*CreateStreamTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -466,6 +500,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetLogs",
 			Handler:    _UserService_GetLogs_Handler,
+		},
+		{
+			MethodName: "CreateStreamToken",
+			Handler:    _UserService_CreateStreamToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

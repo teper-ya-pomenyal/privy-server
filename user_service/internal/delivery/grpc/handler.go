@@ -7,15 +7,16 @@ import (
 
 type UserGRPCHandler struct {
 	userv1.UnimplementedUserServiceServer
-	loginUseCase          *usecase.LoginUseCase
-	registerUseCase       *usecase.RegisterUseCase
-	refreshUseCase        *usecase.RefreshUseCase
-	logoutUseCase         *usecase.LogoutUseCase
-	listSessionsUseCase   *usecase.ListSessionsUseCase
-	revokeSessionsUseCase *usecase.RevokeSessionsUseCase
-	listUsersUseCase      *usecase.ListUsersUseCase
-	setUserBlockedUseCase *usecase.SetUserBlockedUseCase
-	healthUseCase         *usecase.HealthUseCase
+	loginUseCase             *usecase.LoginUseCase
+	registerUseCase          *usecase.RegisterUseCase
+	refreshUseCase           *usecase.RefreshUseCase
+	logoutUseCase            *usecase.LogoutUseCase
+	listSessionsUseCase      *usecase.ListSessionsUseCase
+	revokeSessionsUseCase    *usecase.RevokeSessionsUseCase
+	listUsersUseCase         *usecase.ListUsersUseCase
+	setUserBlockedUseCase    *usecase.SetUserBlockedUseCase
+	healthUseCase            *usecase.HealthUseCase
+	createStreamTokenUseCase *usecase.CreateStreamTokenUseCase
 }
 
 func NewUserGRPCHandler(
@@ -28,16 +29,18 @@ func NewUserGRPCHandler(
 	listUsersUseCase *usecase.ListUsersUseCase,
 	setUserBlockedUseCase *usecase.SetUserBlockedUseCase,
 	healthUseCase *usecase.HealthUseCase,
+	streamToken *usecase.CreateStreamTokenUseCase,
 ) *UserGRPCHandler {
 	return &UserGRPCHandler{
-		loginUseCase:          loginUseCase,
-		registerUseCase:       registerUseCase,
-		refreshUseCase:        refreshUseCase,
-		logoutUseCase:         logoutUseCase,
-		listSessionsUseCase:   listSessionsUseCase,
-		revokeSessionsUseCase: revokeSessionsUseCase,
-		listUsersUseCase:      listUsersUseCase,
-		setUserBlockedUseCase: setUserBlockedUseCase,
-		healthUseCase:         healthUseCase,
+		loginUseCase:             loginUseCase,
+		registerUseCase:          registerUseCase,
+		refreshUseCase:           refreshUseCase,
+		logoutUseCase:            logoutUseCase,
+		listSessionsUseCase:      listSessionsUseCase,
+		revokeSessionsUseCase:    revokeSessionsUseCase,
+		listUsersUseCase:         listUsersUseCase,
+		setUserBlockedUseCase:    setUserBlockedUseCase,
+		healthUseCase:            healthUseCase,
+		createStreamTokenUseCase: streamToken,
 	}
 }

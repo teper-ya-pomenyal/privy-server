@@ -13,10 +13,11 @@ import (
 type Manager struct {
 	privateKey *rsa.PrivateKey
 	accessTTL  time.Duration
+	streamTTL  time.Duration
 }
 
-func NewManager(privateKey *rsa.PrivateKey, accessTTL time.Duration) *Manager {
-	return &Manager{privateKey: privateKey, accessTTL: accessTTL}
+func NewManager(privateKey *rsa.PrivateKey, accessTTL time.Duration, streamTTL time.Duration) *Manager {
+	return &Manager{privateKey: privateKey, accessTTL: accessTTL, streamTTL: streamTTL}
 }
 
 func (m *Manager) NewAccessToken(userUUID uuid.UUID, birthDate time.Time, role string) (string, error) {
@@ -28,6 +29,20 @@ func (m *Manager) NewAccessToken(userUUID uuid.UUID, birthDate time.Time, role s
 		},
 		BirthDate: birthDate,
 		Role:      role,
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	return token.SignedString(m.privateKey)
+}
+
+func (m *Manager) NewStreamToken(userUUID uuid.UUID, birthDate time.Time) (string, error) {
+	claims := StreamClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   userUUID.String(),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.streamTTL)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+		BirthDate: birthDate,
+		Scope:     "stream",
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	return token.SignedString(m.privateKey)

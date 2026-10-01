@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	userv1 "github.com/teper-ya-pomenyal/privy_stream/proto/user/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -128,8 +129,6 @@ func (u *UserClient) ListSessions(ctx context.Context, userUUID string) ([]Sessi
 	return sessions, nil
 }
 
-// RevokeSessions отзывает сессии пользователя: перечисленные sessionIDs либо,
-// если список пуст, все, кроме keepSessionID.
 func (u *UserClient) RevokeSessions(ctx context.Context, userUUID, keepSessionID string, sessionIDs []string) error {
 	_, err := u.grpcClient.RevokeSessions(ctx, &userv1.RevokeSessionsRequest{
 		UserUuid:      userUUID,
@@ -170,4 +169,16 @@ func (u *UserClient) Health(ctx context.Context) (postgres, redis bool, err erro
 		return false, false, err
 	}
 	return res.Postgres, res.Redis, nil
+}
+
+func (u *UserClient) CreateStreamToken(ctx context.Context, userUUID uuid.UUID, birthDate time.Time) (string, error) {
+	req := userv1.CreateStreamTokenRequest{
+		UserUuid:  userUUID.String(),
+		BirthDate: timestamppb.New(birthDate),
+	}
+	res, err := u.grpcClient.CreateStreamToken(ctx, &req)
+	if err != nil {
+		return "", err
+	}
+	return res.StreamToken, nil
 }
